@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.2</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.example</groupId>
+    <artifactId>unittest-parallel</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>unittest-parallel</name>
+    <description>Spring Boot unit + integration tests running in parallel, with conflict verification</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <!--
+          Parallelism knobs, override with -Dunit.forks=2 -Dit.forks=2.
+          forks=1 (default): ONE JVM, JUnit runs classes AND methods concurrently -> tests share
+                             Spring contexts / mocks / DB at the same time (hardest mode for conflicts).
+          forks>1          : several JVMs. NOTE: Surefire/Failsafe then feed test classes to each fork
+                             one by one, so inside a fork only METHODS run concurrently (measured by
+                             ParallelismProbe: maxConcurrentClasses=1). Use it for process-level isolation.
+        -->
+        <unit.forks>1</unit.forks>
+        <it.forks>1</it.forks>
+        <test.argLine>-javaagent:${org.mockito:mockito-core:jar} -Xshare:off -Dfork.number=${surefire.forkNumber}</test.argLine>
+        <skipUnitTests>false</skipUnitTests>
+        <it.includes>**/*IT.java</it.includes>
+        <it.testFailureIgnore>false</it.testFailureIgnore>
+        <!-- JUnit worker threads per JVM (system property overrides junit-platform.properties) -->
+        <unit.parallelism>4</unit.parallelism>
+        <it.parallelism>4</it.parallelism>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Needed to compile the ParallelismProbe (a JUnit Platform TestExecutionListener) -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Exposes ${org.mockito:mockito-core:jar} so Mockito is loaded as a proper -javaagent -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Unit tests (*Test): N JVM forks, and JUnit concurrent execution inside each fork -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>${test.argLine}</argLine>
+                    <skipTests>${skipUnitTests}</skipTests>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <forkCount>${unit.forks}</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <systemPropertyVariables>
+                        <probe.phase>unit</probe.phase>
+                        <junit.jupiter.execution.parallel.config.fixed.parallelism>${unit.parallelism}</junit.jupiter.execution.parallel.config.fixed.parallelism>
+                        <probe.dir>${project.build.directory}/parallel-reports</probe.dir>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- Integration tests (*IT): N JVM forks, and JUnit concurrent execution inside each fork -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <argLine>${test.argLine}</argLine>
+                    <includes>
+                        <include>${it.includes}</include>
+                    </includes>
+                    <testFailureIgnore>${it.testFailureIgnore}</testFailureIgnore>
+                    <forkCount>${it.forks}</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <systemPropertyVariables>
+                        <probe.phase>it</probe.phase>
+                        <junit.jupiter.execution.parallel.config.fixed.parallelism>${it.parallelism}</junit.jupiter.execution.parallel.config.fixed.parallelism>
+                        <probe.dir>${project.build.directory}/parallel-reports</probe.dir>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+          Negative control: runs ONLY the intentionally broken *ConflictDemo tests.
+          They are expected to FAIL; failures are recorded (not fatal) so scripts/verify-parallel.sh
+          can assert that every conflict was actually detected.
+        -->
+        <profile>
+            <id>conflict-demo</id>
+            <properties>
+                <skipUnitTests>true</skipUnitTests>
+                <it.includes>**/*ConflictDemo.java</it.includes>
+                <it.testFailureIgnore>true</it.testFailureIgnore>
+                <it.forks>1</it.forks>
+                <!-- every demo test blocks on a barrier waiting for its partner: needs >= 1 thread per test -->
+                <it.parallelism>16</it.parallelism>
+            </properties>
+        </profile>
+    </profiles>
+</project>
