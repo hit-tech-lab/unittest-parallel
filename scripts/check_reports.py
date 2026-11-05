@@ -8,7 +8,7 @@
 import glob, os, sys
 import xml.etree.ElementTree as ET
 
-MAX_IT_CONTEXTS = int(os.environ.get("MAX_IT_CONTEXTS", "3"))
+MAX_IT_CONTEXTS = int(os.environ.get("MAX_IT_CONTEXTS", "4"))
 failures = []
 
 

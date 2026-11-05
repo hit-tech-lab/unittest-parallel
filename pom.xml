@@ -113,6 +113,7 @@
                     <reuseForks>true</reuseForks>
                     <systemPropertyVariables>
                         <probe.phase>unit</probe.phase>
+                        <test.forks>${unit.forks}</test.forks>
                         <junit.jupiter.execution.parallel.config.fixed.parallelism>${unit.parallelism}</junit.jupiter.execution.parallel.config.fixed.parallelism>
                         <probe.dir>${project.build.directory}/parallel-reports</probe.dir>
                     </systemPropertyVariables>
@@ -133,6 +134,7 @@
                     <reuseForks>true</reuseForks>
                     <systemPropertyVariables>
                         <probe.phase>it</probe.phase>
+                        <test.forks>${it.forks}</test.forks>
                         <junit.jupiter.execution.parallel.config.fixed.parallelism>${it.parallelism}</junit.jupiter.execution.parallel.config.fixed.parallelism>
                         <probe.dir>${project.build.directory}/parallel-reports</probe.dir>
                     </systemPropertyVariables>

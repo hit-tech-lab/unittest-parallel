@@ -50,7 +50,7 @@ public class ParallelismProbe implements TestExecutionListener {
         LAST_END.accumulateAndGet(System.currentTimeMillis(), Math::max);
         if (id.isTest()) {
             RUNNING_TESTS.decrementAndGet();
-            if (result.getStatus() != TestExecutionResult.Status.SUCCESSFUL) {
+            if (result.getStatus() == TestExecutionResult.Status.FAILED) {
                 FAILED_TESTS.incrementAndGet();
             }
         } else if (isClass(id)) {
