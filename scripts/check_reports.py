@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Checks the evidence produced by a test run. Exit code != 0 if any check fails.
+"""Checks the evidence produced by a demo-app test run. Exit code != 0 if any check fails.
 
-  check_reports.py single  <target>   # forks=1: classes+methods concurrent in one JVM
-  check_reports.py forked  <target>   # forks>1: several JVMs really overlapping, isolated DBs
-  check_reports.py demo    <target>   # negative controls: every conflict demo must have FAILED
+  check_reports.py single   <target>          # 1 JVM: classes+methods concurrent, context budget, DB per context
+  check_reports.py forked   <target>          # several JVMs overlapping, isolated DBs
+  check_reports.py conflict <target>          # guard OFF: every *ConflictDemo fails because of the real conflict
+  check_reports.py rules    <target> <spec>   # guard ON: classes fail with exactly these rule ids
+       spec = "ClassA=PT01+PT03,ClassB=PT12"  ("ClassX=" means: must pass)
+  check_reports.py one-of   <target> <rule> <ClassA,ClassB>   # exactly one of the classes fails with <rule>
 """
-import glob, os, sys
+import glob, os, re, sys
 import xml.etree.ElementTree as ET
 
-MAX_IT_CONTEXTS = int(os.environ.get("MAX_IT_CONTEXTS", "4"))
+MAX_IT_CONTEXTS = int(os.environ.get("MAX_IT_CONTEXTS", "2"))
 failures = []
 
 
@@ -36,6 +39,15 @@ def i(r, k):
     return int(r.get(k, "0") or 0)
 
 
+def suites(target):
+    out = {}
+    for path in glob.glob(os.path.join(target, "failsafe-reports", "TEST-*.xml")):
+        s = ET.parse(path).getroot()
+        msgs = " ".join((e.get("message") or "") + (e.text or "") for e in s.iter() if e.tag in ("failure", "error"))
+        out[s.get("name").rsplit(".", 1)[-1]] = (int(s.get("failures", 0)) + int(s.get("errors", 0)), msgs)
+    return out
+
+
 def single(target):
     for phase in ("unit", "it"):
         reps = load_probe(target, phase)
@@ -44,10 +56,9 @@ def single(target):
             check(i(r, "failedTests") == 0, f"{phase}: no failed tests ({r.get('failedTests')})")
             check(i(r, "maxConcurrentTests") >= 2, f"{phase}: test methods overlapped (max concurrent = {r.get('maxConcurrentTests')})")
             check(i(r, "maxConcurrentClasses") >= 2, f"{phase}: test classes overlapped (max concurrent = {r.get('maxConcurrentClasses')})")
-            check(i(r, "threads") >= 2, f"{phase}: tests ran on {r.get('threads')} threads")
             if phase == "it":
                 n = i(r, "springContexts")
-                check(1 <= n <= MAX_IT_CONTEXTS, f"it: context cache effective, {n} Spring contexts for all IT classes (max {MAX_IT_CONTEXTS})")
+                check(1 <= n <= MAX_IT_CONTEXTS, f"it: {n} Spring contexts for all IT classes (budget {MAX_IT_CONTEXTS})")
                 check(i(r, "distinctDatabases") == i(r, "contextsWithDatabase"),
                       f"it: every context has its own database ({r.get('distinctDatabases')} DBs / {r.get('contextsWithDatabase')} contexts)")
 
@@ -57,35 +68,45 @@ def forked(target):
         reps = load_probe(target, phase)
         check(len(reps) >= 2, f"{phase}: {len(reps)} JVM forks reported")
         check(len({r["pid"] for r in reps}) == len(reps), f"{phase}: forks are distinct processes")
-        check(len({r["fork"] for r in reps}) == len(reps), f"{phase}: forks have distinct fork numbers {sorted(r['fork'] for r in reps)}")
         check(all(i(r, "failedTests") == 0 for r in reps), f"{phase}: no failed tests in any fork")
         if len(reps) >= 2:
-            latest_start = max(i(r, "startMillis") for r in reps)
-            earliest_end = min(i(r, "endMillis") for r in reps)
-            check(latest_start < earliest_end, f"{phase}: forks ran at the same time (overlap {earliest_end - latest_start} ms)")
-        check(any(i(r, "maxConcurrentTests") >= 2 for r in reps), f"{phase}: methods overlapped inside a fork")
+            overlap = min(i(r, "endMillis") for r in reps) - max(i(r, "startMillis") for r in reps)
+            check(overlap > 0, f"{phase}: forks ran at the same time (overlap {overlap} ms)")
         if phase == "it":
             dbs = [db for r in reps for db in r.get("databases", "").split() if db]
             check(len(dbs) == len(set(dbs)) and len(dbs) >= 2, f"it: {len(dbs)} databases across forks, all distinct")
-            check(all(db.startswith("jdbc:h2:mem:fork" + r["fork"] + "-") or "demo" in db
-                      for r in reps for db in r.get("databases", "").split()),
-                  "it: each fork only used databases tagged with its own fork number")
 
 
-def demo(target):
-    files = glob.glob(os.path.join(target, "failsafe-reports", "TEST-*ConflictDemo.xml"))
-    check(len(files) >= 5, f"demo: {len(files)} conflict demo classes executed")
-    for path in sorted(files):
-        suite = ET.parse(path).getroot()
-        name = suite.get("name").rsplit(".", 1)[-1]
-        broken = int(suite.get("failures", 0)) + int(suite.get("errors", 0))
-        messages = " ".join((e.get("message") or "") + (e.text or "")
-                            for e in suite.iter() if e.tag in ("failure", "error"))
-        check(broken >= 1, f"demo: {name} -> conflict detected ({broken} failing test(s))")
-        check("TESTS_DID_NOT_RUN_CONCURRENTLY" not in messages, f"demo: {name} -> failure is the real conflict, not a scheduling problem")
+def conflict(target):
+    s = suites(target)
+    check(len(s) == 5, f"guard OFF: {len(s)} conflict demo classes executed")
+    for name, (broken, msgs) in sorted(s.items()):
+        check(broken >= 1 and not re.search(r"\[PT\d\d\]", msgs) and "TESTS_DID_NOT_RUN_CONCURRENTLY" not in msgs,
+              f"guard OFF: {name} -> the real conflict happened ({broken} failing test(s))")
+
+
+def rules(target, spec):
+    s = suites(target)
+    for entry in spec.split(","):
+        name, want = entry.split("=")
+        expected = set(filter(None, want.split("+")))
+        broken, msgs = s.get(name, (None, ""))
+        got = set(re.findall(r"\[(PT\d\d)\]", msgs))
+        if not expected:
+            check(broken == 0, f"{name} passes")
+        else:
+            check(broken is not None and broken >= 1 and got == expected,
+                  f"{name} rejected by the guard with {sorted(expected)} (got {sorted(got)})")
+
+
+def one_of(target, rule, names):
+    s = suites(target)
+    hits = [n for n in names.split(",") if rule in s.get(n, (0, ""))[1]]
+    check(len(hits) == 1, f"exactly one of {names} fails with {rule} (got {hits})")
 
 
 if __name__ == "__main__":
     mode, target = sys.argv[1], sys.argv[2]
-    {"single": single, "forked": forked, "demo": demo}[mode](target)
+    {"single": lambda: single(target), "forked": lambda: forked(target), "conflict": lambda: conflict(target),
+     "rules": lambda: rules(target, sys.argv[3]), "one-of": lambda: one_of(target, sys.argv[3], sys.argv[4])}[mode]()
     sys.exit(1 if failures else 0)

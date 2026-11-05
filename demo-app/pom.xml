@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.hittech</groupId>
+        <artifactId>unittest-parallel-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>com.example</groupId>
+    <artifactId>demo-app</artifactId>
+    <name>demo-app</name>
+    <description>Spring Boot app whose unit + integration tests run in parallel, guarded by parallel-test-guard</description>
+
+    <properties>
+        <!--
+          Defaults chosen from the measured benchmark (README): ONE JVM, classes + methods concurrent,
+          one shared context per @SharedContextBase. Forks only add context start-ups.
+        -->
+        <unit.forks>1</unit.forks>
+        <it.forks>1</it.forks>
+        <unit.parallelism>4</unit.parallelism>
+        <it.parallelism>8</it.parallelism>
+        <skipUnitTests>false</skipUnitTests>
+        <it.includes>**/*IT.java</it.includes>
+        <it.testFailureIgnore>false</it.testFailureIgnore>
+        <guard.enabled>true</guard.enabled>
+        <test.argLine>-javaagent:${org.mockito:mockito-core:jar} -Xshare:off -Dfork.number=${surefire.forkNumber}</test.argLine>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- The guard: test scope, activates itself (spring.factories + ServiceLoader) -->
+        <dependency>
+            <groupId>com.hittech</groupId>
+            <artifactId>parallel-test-guard</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Unit tests (*Test), incl. ParallelSafetyTest: the static rule check fails the build BEFORE any IT runs -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>${test.argLine}</argLine>
+                    <skipTests>${skipUnitTests}</skipTests>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <forkCount>${unit.forks}</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <systemPropertyVariables>
+                        <probe.phase>unit</probe.phase>
+                        <test.forks>${unit.forks}</test.forks>
+                        <junit.jupiter.execution.parallel.config.fixed.parallelism>${unit.parallelism}</junit.jupiter.execution.parallel.config.fixed.parallelism>
+                        <probe.dir>${project.build.directory}/parallel-reports</probe.dir>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <argLine>${test.argLine}</argLine>
+                    <includes>
+                        <include>${it.includes}</include>
+                    </includes>
+                    <testFailureIgnore>${it.testFailureIgnore}</testFailureIgnore>
+                    <forkCount>${it.forks}</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <systemPropertyVariables>
+                        <probe.phase>it</probe.phase>
+                        <test.forks>${it.forks}</test.forks>
+                        <paralleltest.enabled>${guard.enabled}</paralleltest.enabled>
+                        <junit.jupiter.execution.parallel.config.fixed.parallelism>${it.parallelism}</junit.jupiter.execution.parallel.config.fixed.parallelism>
+                        <probe.dir>${project.build.directory}/parallel-reports</probe.dir>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+          Negative controls #1: intentionally broken tests (src/conflict-demo).
+            -Pconflict-demo -Dguard.enabled=false : the conflicts really happen (tests fail with wrong data)
+            -Pconflict-demo                       : the guard rejects each class first, naming the rule
+        -->
+        <profile>
+            <id>conflict-demo</id>
+            <properties>
+                <skipUnitTests>true</skipUnitTests>
+                <it.includes>**/*ConflictDemo.java</it.includes>
+                <it.testFailureIgnore>true</it.testFailureIgnore>
+                <it.parallelism>16</it.parallelism>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-conflict-demo</id>
+                                <phase>generate-test-sources</phase>
+                                <goals>
+                                    <goal>add-test-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/conflict-demo/java</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Negative controls #2: violations only detectable at runtime (src/guard-demo) -->
+        <profile>
+            <id>guard-demo</id>
+            <properties>
+                <skipUnitTests>true</skipUnitTests>
+                <it.includes>**/*GuardDemo.java</it.includes>
+                <it.testFailureIgnore>true</it.testFailureIgnore>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-guard-demo</id>
+                                <phase>generate-test-sources</phase>
+                                <goals>
+                                    <goal>add-test-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/guard-demo/java</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

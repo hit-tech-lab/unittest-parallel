@@ -1,0 +1,4 @@
+org.springframework.test.context.TestExecutionListener=\
+com.hittech.paralleltest.guard.ParallelGuardTestExecutionListener
+org.springframework.test.context.ContextCustomizerFactory=\
+com.hittech.paralleltest.guard.ParallelGuardContextCustomizerFactory
