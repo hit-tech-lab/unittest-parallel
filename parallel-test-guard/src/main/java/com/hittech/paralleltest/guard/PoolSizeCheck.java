@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.context.ApplicationContext;
 
 /** Fails fast when a pooled DataSource is smaller than the JUnit parallelism (rule PT11). */
@@ -34,7 +35,9 @@ final class PoolSizeCheck {
         return out;
     }
 
-    private static Integer maxPoolSize(DataSource ds) {
+    private static Integer maxPoolSize(DataSource proxyOrTarget) {
+        Object ds = AopProxyUtils.getSingletonTarget(proxyOrTarget) != null
+                ? AopProxyUtils.getSingletonTarget(proxyOrTarget) : proxyOrTarget; // unwrap the SQL guard proxy
         for (String getter : List.of("getMaximumPoolSize", "getMaxTotal", "getMaxActive")) { // Hikari, DBCP2, Tomcat
             try {
                 Method m = ds.getClass().getMethod(getter);

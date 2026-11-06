@@ -1,7 +1,7 @@
 package com.example.parallel.it;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.example.parallel.account.Account;
 import com.example.parallel.account.InsufficientFundsException;
@@ -28,7 +28,6 @@ class ConcurrentTransferIT extends AbstractIntegrationTest {
 
     @RepeatedTest(3)
     void moneyIsConservedUnderConcurrentTransfers() throws Exception {
-        when(exchangeRates.rate("USD", "USD")).thenReturn(BigDecimal.ONE); // never used: same currency
         List<Account> accts = List.of(newAccount("USD", "100"), newAccount("USD", "100"), newAccount("USD", "100"));
         AtomicInteger ok = new AtomicInteger();
         AtomicInteger rejected = new AtomicInteger();
@@ -59,5 +58,6 @@ class ConcurrentTransferIT extends AbstractIntegrationTest {
         assertThat(accts).allSatisfy(a -> assertThat(balanceOf(a)).isNotNegative());
         assertThat(ok.get() + rejected.get()).isEqualTo(120);
         assertThat(ok.get()).isPositive();
+        verifyNoInteractions(exchangeRates); // same currency: no FX call, even from the 8 worker threads
     }
 }

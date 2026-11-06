@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 /** Real HTTP through the embedded server; mocks follow the request to the server thread. */
 class TransferApiIT extends AbstractIntegrationTest {
@@ -65,8 +66,11 @@ class TransferApiIT extends AbstractIntegrationTest {
         Account a = newAccount("USD", "100");
         Account b = newAccount("EUR", "0");
 
-        assertThatThrownBy(() -> transfer(a, b, "10")).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> transfer(a, b, "10"))
+                .isInstanceOfSatisfying(HttpServerErrorException.class,
+                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR));
         assertThat(balanceOf(a)).isEqualByComparingTo("100");
+        assertThat(balanceOf(b)).isEqualByComparingTo("0");
     }
 
     @Test

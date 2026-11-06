@@ -15,6 +15,8 @@ import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
+import com.hittech.paralleltest.core.TestBindings;
+import com.hittech.paralleltest.guard.JUnitConfig;
 
 /**
  * JUnit Platform listener (registered via META-INF/services) that measures how parallel the run
@@ -32,6 +34,12 @@ public class ParallelismProbe implements TestExecutionListener {
     private static final AtomicLong FIRST_START = new AtomicLong(Long.MAX_VALUE);
     private static final AtomicLong LAST_END = new AtomicLong();
     private static final Set<String> THREADS = ConcurrentHashMap.newKeySet();
+
+    /** Gives the guard the REAL JUnit configuration (incl. build-tool parameters). */
+    @Override
+    public void testPlanExecutionStarted(TestPlan testPlan) {
+        JUnitConfig.capture(testPlan.getConfigurationParameters());
+    }
 
     @Override
     public void executionStarted(TestIdentifier id) {
@@ -91,6 +99,7 @@ public class ParallelismProbe implements TestExecutionListener {
         p.setProperty("contextsWithDatabase", Long.toString(ctxWithDb));
         p.setProperty("distinctDatabases", Integer.toString(dbs.size()));
         p.setProperty("databases", String.join(" ", dbs));
+        p.setProperty("unattributedGuardViolations", Integer.toString(TestBindings.unattributedViolations()));
 
         try {
             Path out = Path.of(dir, phase + "-fork" + fork + "-" + pid + ".properties");

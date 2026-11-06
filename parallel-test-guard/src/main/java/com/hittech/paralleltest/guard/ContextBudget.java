@@ -25,24 +25,28 @@ final class ContextBudget {
             ApplicationContext c = ctx.get();
             return c != null && (!(c instanceof ConfigurableApplicationContext cac) || cac.isActive());
         }
+
+        boolean is(ApplicationContext other) {
+            return ctx.get() == other;
+        }
     }
 
-    private static final Map<Integer, Entry> CONTEXTS = new LinkedHashMap<>();
+    private static final List<Entry> CONTEXTS = new ArrayList<>(); // a handful of entries: a list is enough
 
     private ContextBudget() {
     }
 
-    /** @return true if this context is seen for the first time. */
+    /** @return true if this context is seen for the first time. Called for every test instance: kept cheap. */
     static synchronized boolean register(ApplicationContext ctx, Class<?> testClass, int max) {
-        int id = System.identityHashCode(ctx);
-        Entry existing = CONTEXTS.get(id);
-        if (existing != null && existing.ctx().get() == ctx) {
-            return false;
+        for (Entry e : CONTEXTS) {
+            if (e.is(ctx)) {
+                return false;
+            }
         }
-        CONTEXTS.values().removeIf(e -> !e.alive());
+        CONTEXTS.removeIf(e -> !e.alive());
         Map<String, String> config = describe(testClass);
-        List<Entry> others = new ArrayList<>(CONTEXTS.values());
-        CONTEXTS.put(id, new Entry(new WeakReference<>(ctx), testClass.getName(), config));
+        List<Entry> others = List.copyOf(CONTEXTS);
+        CONTEXTS.add(new Entry(new WeakReference<>(ctx), testClass.getName(), config));
         if (CONTEXTS.size() > max) {
             StringBuilder detail = new StringBuilder(testClass.getName() + " started context #" + CONTEXTS.size()
                     + " (max-contexts=" + max + "). Existing contexts were started by:");
@@ -54,11 +58,6 @@ final class ContextBudget {
                     List.of(new Violation(Rule.PT10, testClass.getName(), detail.toString())));
         }
         return true;
-    }
-
-    static synchronized int liveContexts() {
-        CONTEXTS.values().removeIf(e -> !e.alive());
-        return CONTEXTS.size();
     }
 
     private static Map<String, String> describe(Class<?> testClass) {

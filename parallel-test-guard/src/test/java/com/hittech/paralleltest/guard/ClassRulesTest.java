@@ -36,6 +36,10 @@ class ClassRulesTest {
                 Arguments.of(Fixtures.UnroutedMockCase.class, Set.of(Rule.PT05)),
                 Arguments.of(Fixtures.StaticStateCase.class, Set.of(Rule.PT06)),
                 Arguments.of(Fixtures.ForbiddenCallCase.class, Set.of(Rule.PT07)),
+                Arguments.of(Fixtures.MethodReferenceCase.class, Set.of(Rule.PT07)),
+                Arguments.of(Fixtures.LocalClassCase.class, Set.of(Rule.PT07)),
+                Arguments.of(Fixtures.PerClassCase.class, Set.of(Rule.PT13)),
+                Arguments.of(Fixtures.PerClassSameThreadCase.class, Set.of()),
                 Arguments.of(Fixtures.FixedPortCase.class, Set.of(Rule.PT08)),
                 Arguments.of(Fixtures.ListenersReplacedCase.class, Set.of(Rule.PT09)));
     }
@@ -59,6 +63,14 @@ class ClassRulesTest {
         assertThat(v).extracting(Violation::detail)
                 .anySatisfy(d -> assertThat(d).contains("ThingRepository.deleteAll"))
                 .anySatisfy(d -> assertThat(d).contains("ThingRepository.count"));
+    }
+
+    @Test
+    void methodReferencesAndLocalClassesAreScanned() {
+        assertThat(ClassRules.doCheck(Fixtures.MethodReferenceCase.class, DEFAULTS)).singleElement()
+                .satisfies(v -> assertThat(v.detail()).contains("references").contains("deleteAll"));
+        assertThat(ClassRules.doCheck(Fixtures.LocalClassCase.class, DEFAULTS)).singleElement()
+                .satisfies(v -> assertThat(v.location()).contains("LocalClassCase.1Cleaner.clean"));
     }
 
     @Test
@@ -88,6 +100,6 @@ class ClassRulesTest {
                 .noneSatisfy(l -> assertThat(l).contains("GoodCase"));
         assertThat(all.stream().map(Violation::rule).collect(Collectors.toSet()))
                 .containsAll(Set.of(Rule.PT01, Rule.PT02, Rule.PT03, Rule.PT04, Rule.PT05, Rule.PT06, Rule.PT07,
-                        Rule.PT08, Rule.PT09));
+                        Rule.PT08, Rule.PT09, Rule.PT13));
     }
 }

@@ -5,7 +5,8 @@
 #  2. multi-fork run
 #  3. conflict demos with the guard OFF  -> the conflicts really happen
 #  4. conflict demos with the guard ON   -> each class is rejected first, with the expected rule ids
-#  5. runtime-only rules (SQL PT12, pool PT11) and context budget (PT10)
+#  5. runtime-only rules (SQL PT12 via JPA / @Sql / JdbcTemplate, pool PT11) and context budget (PT10)
+#  B1 regression: guard disabled -> per-test mocks still routed, ITs still green
 set -euo pipefail
 cd "$(dirname "$0")/.."
 RUNS="${RUNS:-3}"
@@ -34,6 +35,10 @@ done
 run forked -pl demo-app clean verify -Dunit.forks=2 -Dit.forks=2
 $CHECK forked $T
 
+# regression B1: switching the rules off must not change test behaviour (mocks still routed)
+run guard-disabled-still-routes -pl demo-app clean verify -DskipUnitTests -Dguard.enabled=false
+$CHECK rules $T "TransferApiIT=,TransferServiceIT=,ConcurrentTransferIT="
+
 run conflict-guard-off -pl demo-app clean verify -Pconflict-demo -Dguard.enabled=false
 $CHECK conflict $T
 
@@ -41,7 +46,7 @@ run conflict-guard-on -pl demo-app clean verify -Pconflict-demo
 $CHECK rules $T "SharedMockitoBeanConflictDemo=PT01+PT03,SharedDatabaseConflictDemo=PT01+PT07,SharedSingletonStateConflictDemo=PT01+PT07,DirtiesContextConflictDemo=PT01+PT04+PT07,TransactionalRollbackConflictDemo=PT01"
 
 run guard-runtime -pl demo-app clean verify -Pguard-demo
-$CHECK rules $T "ForbiddenSqlGuardDemo=PT12,PoolTooSmallGuardDemo=PT11"
+$CHECK rules $T "ForbiddenSqlGuardDemo=PT12,SqlScriptGuardDemo=PT12,JdbcTemplateGuardDemo=PT12,PoolTooSmallGuardDemo=PT11"
 
 run guard-budget -pl demo-app clean verify -Pguard-demo "-Dit.includes=**/*BudgetDemo.java" -Dparalleltest.max-contexts=1
 $CHECK one-of $T PT10 ContextBudgetABudgetDemo,ContextBudgetBBudgetDemo

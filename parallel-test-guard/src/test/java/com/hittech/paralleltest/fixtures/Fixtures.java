@@ -6,6 +6,9 @@ import com.hittech.paralleltest.mock.PerTestMock;
 import com.hittech.paralleltest.mock.RoutedMocks;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -201,6 +204,47 @@ public final class Fixtures {
 
     @TestExecutionListeners(DependencyInjectionTestExecutionListener.class)
     public static class ListenersReplacedCase extends Base {
+        @Test
+        void test() {
+        }
+    }
+
+    public static class MethodReferenceCase extends Base {
+        ThingRepository repository;
+
+        @Test
+        void test() {
+            Runnable wipe = repository::deleteAll; // invokedynamic, not invokeinterface
+            wipe.run();
+        }
+    }
+
+    public static class LocalClassCase extends Base {
+        ThingRepository repository;
+
+        @Test
+        void test() {
+            class Cleaner {
+                void clean() {
+                    repository.count();
+                }
+            }
+            new Cleaner().clean();
+        }
+    }
+
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    public static class PerClassCase extends Base {
+        @PerTestMock Collaborator collaborator;
+
+        @Test
+        void test() {
+        }
+    }
+
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @Execution(ExecutionMode.SAME_THREAD)
+    public static class PerClassSameThreadCase extends Base {
         @Test
         void test() {
         }

@@ -17,7 +17,7 @@ import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 
-/** Rules checkable by reflection on a Spring test class (PT01-PT09) plus bytecode call rules (PT07). */
+/** Rules checkable without starting a context: reflection (PT01-PT06, PT08, PT09, PT13) and bytecode (PT07). */
 public final class ClassRules {
 
     /** Class-level annotations (directly or meta-present) that change the context cache key. */
@@ -50,6 +50,8 @@ public final class ClassRules {
     static final String JUNIT_ISOLATED = "org.junit.jupiter.api.parallel.Isolated";
     static final String JUNIT_RESOURCE_LOCK = "org.junit.jupiter.api.parallel.ResourceLock";
     static final String JUNIT_RESOURCE_LOCKS = "org.junit.jupiter.api.parallel.ResourceLocks";
+    static final String JUNIT_TEST_INSTANCE = "org.junit.jupiter.api.TestInstance";
+    static final String JUNIT_EXECUTION = "org.junit.jupiter.api.parallel.Execution";
 
     private static final Map<Class<?>, List<Violation>> CACHE = new ConcurrentHashMap<>();
 
@@ -147,6 +149,12 @@ public final class ClassRules {
             }
         }
 
+        // PT13 one shared test instance + concurrent methods
+        if (perClassLifecycle(testClass) && methodsMayRunConcurrently(testClass, isolated || resourceLocked)) {
+            v.add(new Violation(Rule.PT13, testClass.getName(),
+                    "@TestInstance(PER_CLASS) (or junit.jupiter.testinstance.lifecycle.default=per_class) while methods run concurrently"));
+        }
+
         // PT07 forbidden calls in the bytecode of the test class and its superclasses (user code only)
         if (!isolated) {
             for (Class<?> c : chain) {
@@ -184,6 +192,32 @@ public final class ClassRules {
                         "nested @Configuration/@TestConfiguration is picked up into the test context"));
             }
         }
+    }
+
+    private static boolean perClassLifecycle(Class<?> testClass) {
+        MergedAnnotation<?> ti = firstInHierarchyOrEnclosing(testClass, JUNIT_TEST_INSTANCE);
+        return ti.isPresent() ? "PER_CLASS".equals(String.valueOf(ti.getValue("value").orElse("")))
+                : JUnitConfig.perClassLifecycleByDefault();
+    }
+
+    /** Mirrors JUnit: locks and @Isolated force SAME_THREAD on children, else @Execution, else the global default. */
+    private static boolean methodsMayRunConcurrently(Class<?> testClass, boolean lockedOrIsolated) {
+        if (lockedOrIsolated || !JUnitConfig.parallelEnabled()) {
+            return false;
+        }
+        MergedAnnotation<?> ex = firstInHierarchyOrEnclosing(testClass, JUNIT_EXECUTION);
+        return ex.isPresent() ? "CONCURRENT".equals(String.valueOf(ex.getValue("value").orElse("")))
+                : JUnitConfig.methodsConcurrentByDefault();
+    }
+
+    private static MergedAnnotation<?> firstInHierarchyOrEnclosing(Class<?> testClass, String annotation) {
+        for (Class<?> c : hierarchyAndEnclosing(testClass)) {
+            MergedAnnotation<?> a = MergedAnnotations.from(c, SearchStrategy.DIRECT).get(annotation);
+            if (a.isPresent()) {
+                return a;
+            }
+        }
+        return MergedAnnotation.missing();
     }
 
     static Set<Class<?>> routedTypes(Class<?> testClass) {

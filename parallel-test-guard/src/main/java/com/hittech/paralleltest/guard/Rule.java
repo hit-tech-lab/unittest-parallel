@@ -51,8 +51,19 @@ public enum Rule {
             "set spring.datasource.hikari.maximum-pool-size >= JUnit parallelism in the test profile"),
 
     PT12("Whole-table SQL executed during a parallel test",
-            "TRUNCATE / DELETE without WHERE removes rows of tests running at the same time",
-            "delete only rows you created (WHERE id = ...), or annotate the class JUnit @Isolated");
+            "TRUNCATE / DELETE without WHERE (JPA, JdbcTemplate, @Sql scripts or plain JDBC) removes rows of tests "
+                    + "running at the same time",
+            "delete only rows you created (WHERE id = ...), or annotate the class JUnit @Isolated"),
+
+    PT13("@TestInstance(PER_CLASS) with concurrently running methods",
+            "all methods share ONE test instance: fields (including @PerTestMock mocks) are overwritten by "
+                    + "methods running at the same time",
+            "use the default PER_METHOD lifecycle, or annotate the class @Execution(SAME_THREAD)"),
+
+    PT14("Real bean of a @RoutedMocks type is injected somewhere",
+            "beans that inject the implementation by concrete class, @Qualifier or as a collection get the REAL "
+                    + "bean, bypassing the per-test mocks without any error",
+            "inject the routed interface type in production code, or add the concrete type to @RoutedMocks");
 
     private final String title;
     private final String why;

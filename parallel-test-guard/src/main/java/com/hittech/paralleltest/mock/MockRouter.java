@@ -3,6 +3,7 @@ package com.hittech.paralleltest.mock;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
+import com.hittech.paralleltest.core.TestBindings;
 import org.mockito.Answers;
 import org.mockito.Mockito;
 
@@ -24,8 +25,8 @@ public final class MockRouter {
                 .name("perTestMockRouter(" + type.getSimpleName() + ")")
                 .defaultAnswer(invocation -> {
                     Method method = invocation.getMethod();
-                    PerTestMocks.Binding binding = PerTestMocks.current();
-                    Object target = binding == null ? null : binding.mocks().get(type);
+                    TestBindings.Binding binding = TestBindings.current();
+                    Object target = binding == null ? null : binding.mockFor(type);
                     if (target == null) {
                         if (CONTAINER_TYPES.contains(method.getDeclaringClass().getName())) {
                             return Answers.RETURNS_DEFAULTS.answer(invocation);
@@ -41,7 +42,7 @@ public final class MockRouter {
                 }));
     }
 
-    private static String noBindingMessage(Class<?> type, Method method, PerTestMocks.Binding binding) {
+    private static String noBindingMessage(Class<?> type, Method method, TestBindings.Binding binding) {
         String where = Thread.currentThread().getName();
         if (binding != null) {
             return "[parallel-test-guard] Test '" + binding.testName() + "' has no @PerTestMock field of type "

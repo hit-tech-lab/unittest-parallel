@@ -56,6 +56,7 @@ def single(target):
             check(i(r, "failedTests") == 0, f"{phase}: no failed tests ({r.get('failedTests')})")
             check(i(r, "maxConcurrentTests") >= 2, f"{phase}: test methods overlapped (max concurrent = {r.get('maxConcurrentTests')})")
             check(i(r, "maxConcurrentClasses") >= 2, f"{phase}: test classes overlapped (max concurrent = {r.get('maxConcurrentClasses')})")
+            check(i(r, "unattributedGuardViolations") == 0, f"{phase}: no guard violation outside any test ({r.get('unattributedGuardViolations')})")
             if phase == "it":
                 n = i(r, "springContexts")
                 check(1 <= n <= MAX_IT_CONTEXTS, f"it: {n} Spring contexts for all IT classes (budget {MAX_IT_CONTEXTS})")
