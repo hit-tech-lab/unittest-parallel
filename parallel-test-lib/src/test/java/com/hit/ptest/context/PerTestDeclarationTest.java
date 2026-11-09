@@ -85,6 +85,15 @@ class PerTestDeclarationTest {
             return new StaticMessageSource();
         }
 
+        /** Bean kho dữ liệu (Map/Collection) do ứng dụng khai báo: không bọc theo wildcard. */
+        @Bean java.util.Map<String, Object> dataMap() {
+            return new java.util.HashMap<>();
+        }
+
+        @Bean java.util.List<String> dataList() {
+            return new java.util.ArrayList<>();
+        }
+
         @Bean ConfigData configData() {
             return new ConfigData();
         }
@@ -176,6 +185,22 @@ class PerTestDeclarationTest {
     }
 
     @Test
+    void dataHolderBeansAreNotWrappedByWildcardButCanBeWrappedByName() {
+        AnnotationConfigApplicationContext c = started("data-holder", new String[] {"*"}, new String[0]);
+        ManagedContext mc = Fixtures.managed(c);
+
+        assertThat(mc.interceptors).doesNotContainKeys("dataMap", "dataList");
+        assertThat(mc.plan.whyNotWrapped("dataMap")).contains("data-holder");
+        assertThat(mc.plan.whyNotWrapped("dataList")).contains("data-holder");
+        assertThat(c.getBean("dataMap")).as("real instance, not a Mockito spy").isExactlyInstanceOf(java.util.HashMap.class);
+        assertThat(c.getBean("dataList")).isExactlyInstanceOf(java.util.ArrayList.class);
+
+        ManagedContext named = Fixtures.managed(started("data-holder-named", new String[] {"*", "dataMap"}, new String[0]));
+        assertThat(named.interceptors).as("explicit name still wraps, like @ConfigurationProperties").containsKey("dataMap");
+        assertThat(named.interceptors).doesNotContainKey("dataList");
+    }
+
+    @Test
     void resolvesByQualifierSingleTypeAndFieldName() {
         AnnotationConfigApplicationContext c = started("resolve", new String[] {"*"}, new String[0]);
         ManagedContext mc = Fixtures.managed(c);
@@ -191,7 +216,7 @@ class PerTestDeclarationTest {
         ManagedContext mc = Fixtures.managed(started("by-value", new String[] {"*"}, new String[0]));
 
         assertThat(mc.resolveFields(ByNameAttribute.class)).extracting(ResolvedRequest::beanName).containsExactly("primaryFx");
-        BeanRequest param = BeanDeclarations.parameterRequest(ParamHolder.class.getDeclaredMethod("t", Fx.class), 
+        BeanRequest param = BeanDeclarations.parameterRequest(ParamHolder.class.getDeclaredMethod("t", Fx.class),
                 ParamHolder.class.getDeclaredMethod("t", Fx.class).getParameters()[0], 0);
         assertThat(mc.resolve(param).beanName()).isEqualTo("backupFx");
     }

@@ -17,7 +17,7 @@ Danh sách các hành vi khác Spring Test thường hoặc không khắc phục
 | Mock cấp class so với `@MockBean` | không qua BeanPostProcessor như `@MockBean`; còn khác ở `@ConditionalOnBean`, thuộc tính định nghĩa không giữ khi thay và stub qua handle thay vì stub thẳng bean tiêm: xem [LIMITS.md](../parallel-test-lib/LIMITS.md) mục 4 |
 | `@PerTestSpy` trên bean đã bị `@PerTestMock` cấp class thay/tạo | `SPY_NO_BEAN`, không còn bản thật |
 | Lời gọi thứ hai vào method `@Cacheable` | được cache trả lời nên spy không thấy (như `@MockitoSpyBean`) |
-| Bean không được bọc mặc định (hạ tầng, `@ConfigurationProperties`, `FactoryBean`, prototype...) | không mock được theo test, trừ khi liệt kê tên trong `wrap` |
+| Bean không được bọc mặc định (hạ tầng, `@ConfigurationProperties`, bean kiểu `Map`/`Collection`, `FactoryBean`, prototype...) | không mock được theo test, trừ khi liệt kê tên trong `wrap` |
 
 ## JUnit và song song
 

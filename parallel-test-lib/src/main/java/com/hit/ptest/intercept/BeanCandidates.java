@@ -14,6 +14,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
  *   <li>có bean definition vai trò APPLICATION (không phải bean hạ tầng, không phải singleton đăng ký tay);</li>
  *   <li>kiểu thật của nó (với JDK proxy, các interface được proxy: vd repository Spring Data) không thuộc thư viện hạ tầng
  *   ({@link #FRAMEWORK_PREFIXES});</li>
+ *   <li>không phải bean kho dữ liệu (kiểu thuộc {@code java.util.Map}/{@code java.util.Collection}), vd map thuộc tính do ứng dụng khai báo;</li>
  *   <li>không phải lớp {@code @Configuration};</li>
  *   <li>(trừ JDK proxy của FactoryBean) lớp định nghĩa bean ({@code @Bean} method hoặc chính lớp) không thuộc
  *   {@code org.springframework.}: bean của auto-config như DataSource, EntityManagerFactory, executor, ObjectMapper bị loại.</li>
@@ -50,6 +51,10 @@ final class BeanCandidates {
         if (isConfigurationProperties(def, types[0])) {
             return "@ConfigurationProperties bean (configuration data, not wrapped by default): replace it with a class-level "
                     + "@PerTestMock (a mock like @MockBean) or list its name in wrap to wrap the real bean";
+        }
+        if (java.util.Arrays.stream(types).anyMatch(BeanCandidates::isDataHolderType)) {
+            return "data-holder bean (Map/Collection, " + types[0].getName() + "): a spy would break code that reads it as plain data; "
+                    + "list its name in wrap to wrap it";
         }
         if (java.util.Arrays.stream(types).allMatch(BeanCandidates::isFrameworkType)) {
             // Bean do ứng dụng tự định nghĩa (@Bean ở lớp của ứng dụng) nhưng kiểu thuộc framework (RestTemplate, ObjectMapper, executor...)
@@ -93,6 +98,11 @@ final class BeanCandidates {
         }
         return def instanceof AnnotatedBeanDefinition annotated && annotated.getFactoryMethodMetadata() != null
                 && annotated.getFactoryMethodMetadata().isAnnotated(CONFIGURATION_PROPERTIES);
+    }
+
+    /** Kho dữ liệu thuần ({@code Map}/{@code Collection} và hậu duệ): không bọc theo wildcard. */
+    private static boolean isDataHolderType(Class<?> type) {
+        return java.util.Map.class.isAssignableFrom(type) || java.util.Collection.class.isAssignableFrom(type);
     }
 
     private static boolean isFrameworkType(Class<?> type) {

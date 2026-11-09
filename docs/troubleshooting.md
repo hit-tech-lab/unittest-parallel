@@ -13,7 +13,7 @@ Bảng đầy đủ: mục 6 của [GUARD.md](../parallel-test-lib/GUARD.md).
 | `SPY_NO_BEAN` | `@PerTestSpy` trên bean không tồn tại, hoặc đã bị `@PerTestMock` cấp class thay/tạo (thông điệp nói "REPLACED"/"CREATED") | bỏ spy, hoặc bỏ khai báo mock cấp class (mock ở lớp cần bằng field) |
 | `MODE_CONFLICT` | cùng bean vừa mock vừa spy ở field/tham số trong cùng phân cấp (kể cả `@Nested`) | giữ một chế độ; tham số method ghi đè field cùng bean chỉ cho method đó |
 | `MOCK_ONLY_CONFLICT` | cùng `name` khai cấp class với hai kiểu; `name` đã dùng cho bean khác kiểu; hai khai báo cùng thay một bean; sau refresh có thêm bean cùng kiểu với bean mock được tạo | đổi `name`, khai một lần, hoặc đặt `name` đúng bean cần thay |
-| `BEAN_NOT_WRAPPED` | bean có nhưng không được bọc (`exclude`, `@ConfigurationProperties`, bean hạ tầng, prototype/scope, `wrap` thu hẹp); thông điệp nêu lý do | thêm tên vào `wrap`, bỏ khỏi `exclude`, mock cấp class, hoặc không mock bean đó |
+| `BEAN_NOT_WRAPPED` | bean có nhưng không được bọc (`exclude`, `@ConfigurationProperties`, bean kiểu `Map`/`Collection`, bean hạ tầng, prototype/scope, `wrap` thu hẹp); thông điệp nêu lý do | thêm tên vào `wrap`, bỏ khỏi `exclude`, mock cấp class, hoặc không mock bean đó |
 | `BEAN_NOT_INTERCEPTABLE` | tên tường minh trong `wrap` không tồn tại hoặc không bọc được (`BeanPostProcessor`, prototype) | sửa `wrap` |
 | `INVALID_DECLARATION` | field `static`/`final`; cả hai annotation trên cùng field; cấp class không có kiểu hoặc `name` đi với nhiều kiểu; `value`/`classes` đặt ở field/tham số | sửa theo thông điệp |
 | `MOCK_REPLACE_UNSUPPORTED` | bean cần thay chỉ là singleton đăng ký tay, không có bean definition | tạo bean bằng `@Bean`/`@Component` hoặc không khai cấp class |

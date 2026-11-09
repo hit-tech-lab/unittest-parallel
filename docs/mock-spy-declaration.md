@@ -211,7 +211,7 @@ Hai điều cần biết với bean được mock theo từng test:
 
 - Bean phải được bọc. Mặc định `wrap = {"*"}` bọc mọi bean singleton do ứng dụng định nghĩa (kể cả `@Bean` có kiểu của framework như
   `RestTemplate`, `ObjectMapper`). Không bọc: bean hạ tầng do framework định nghĩa, kiểu hạ tầng (`DataSource`,
-  `EntityManagerFactory`, transaction manager, `MessageSource`, `ConversionService`), bean `@ConfigurationProperties`,
+  `EntityManagerFactory`, transaction manager, `MessageSource`, `ConversionService`), bean `@ConfigurationProperties`, bean kho dữ liệu (kiểu `Map`/`Collection`, vd map thuộc tính khai báo bằng `@Bean`),
   `BeanPostProcessor`, `FactoryBean`, prototype/scope khác. Muốn mock bean bị bỏ qua thì liệt kê tên:
   `wrap = {"*", "limitProperties"}`. Tên không có wildcard bắt buộc phải tồn tại và bọc được, nếu không là `BEAN_NOT_INTERCEPTABLE`.
 - `exclude` thắng `wrap`; mock/spy bean bị loại nhận `BEAN_NOT_WRAPPED` kèm lý do:
