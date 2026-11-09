@@ -1,1 +1,1 @@
-io.hit.ptest.junit.ParallelReportListener
+com.hit.ptest.junit.ParallelReportListener

@@ -1,6 +1,6 @@
 package demo.demo;
 
-import io.hit.ptest.guard.AbstractParallelSafetyTest;
+import com.hit.ptest.guard.AbstractParallelSafetyTest;
 
 /**
  * Quét tĩnh cả source set KHÔNG loại trừ package demo (profile conflict-demo đặt ptest.guard.scan-exclude rỗng): phải

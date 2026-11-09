@@ -3,7 +3,7 @@ package demo.it;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import demo.support.Rendezvous;
-import io.hit.ptest.ParallelTest;
+import com.hit.ptest.ParallelTest;
 import org.junit.jupiter.api.Test;
 
 class AltContextBIT extends AltBaseIT {

@@ -2,7 +2,7 @@ package demo.demo;
 
 import demo.core.DemoApp;
 import demo.it.MainIT;
-import io.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelSpringTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

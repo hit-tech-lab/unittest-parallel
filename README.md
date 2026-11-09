@@ -1,10 +1,10 @@
 # ptest: chạy test Spring Boot song song (bản Spring Boot 3)
 
-Thư viện `io.hit.ptest` cho phép các lớp test `@SpringBootTest` chạy song song trong cùng một JVM, dùng chung
+Thư viện `com.hit.ptest` cho phép các lớp test `@SpringBootTest` chạy song song trong cùng một JVM, dùng chung
 `ApplicationContext`, và mỗi test vẫn có mock/spy riêng của mình trên bean của context đó.
 
 - Bản này: Spring Boot 3.3+, Spring Framework 6.1+, Java 17+, JUnit 5.x, Mockito 5 (mock maker inline).
-- Artifact: `io.hit.research:parallel-test-lib:0.1.0-SNAPSHOT` (module `parallel-test-lib`).
+- Artifact: `com.hit.research:parallel-test-lib:0.1.0-SNAPSHOT` (module `parallel-test-lib`).
 - Bản Spring Boot 4 có cùng API và cùng tài liệu; chỉ khác phiên bản và tọa độ Maven.
 
 ## Mục lục
@@ -34,7 +34,7 @@ Ví dụ dùng các lớp `demo.core.*` của module `lib-tests` (`DemoApp`, `Tr
 
 ```xml
 <dependency>
-    <groupId>io.hit.research</groupId>
+    <groupId>com.hit.research</groupId>
     <artifactId>parallel-test-lib</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <scope>test</scope>
@@ -85,7 +85,7 @@ import demo.core.AccountRepository;
 import demo.core.DemoApp;
 import demo.core.ExchangeRateClient;
 import demo.core.TransferService;
-import io.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -136,7 +136,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import demo.core.ExchangeRateClient;
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestSpy;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -167,7 +167,7 @@ import static org.mockito.Mockito.when;
 import demo.core.Account;
 import demo.core.ExchangeRateClient;
 import demo.core.TransferService;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import demo.core.DemoApp;
 import demo.support.DbProbe;
-import io.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelSpringTest;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

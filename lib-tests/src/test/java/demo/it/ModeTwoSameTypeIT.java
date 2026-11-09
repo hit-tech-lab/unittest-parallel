@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import io.hit.ptest.PerTestMock;
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestSpy;
 import org.springframework.beans.factory.annotation.Qualifier;
 import demo.core.Account;
 import demo.core.ExchangeRateClient;

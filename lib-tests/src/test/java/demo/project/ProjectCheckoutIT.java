@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import org.junit.jupiter.api.Test;
 
 /** Ba test chạy đồng thời trên CÙNG bean CheckoutService thật, mỗi test stub riêng ba cổng cùng kiểu bằng @Qualifier của lớp cơ sở. */

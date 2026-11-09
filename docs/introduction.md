@@ -43,7 +43,7 @@ class OrderCTest extends MainIT { }
 
 ## Phạm vi API công khai
 
-Người dùng chỉ dùng package `io.hit.ptest`: `@ParallelSpringTest`, `@PerTestMock`/`@PerTestMocks`,
+Người dùng chỉ dùng package `com.hit.ptest`: `@ParallelSpringTest`, `@PerTestMock`/`@PerTestMocks`,
 `@PerTestSpy`/`@PerTestSpies`, `@SuppressGuard`, `ParallelTest`, `ParallelTestException`, `UnboundPolicy`; cùng
-`io.hit.ptest.guard.AbstractParallelSafetyTest` và `io.hit.ptest.propagation.BindingHeaderInterceptor`. Các lớp public
+`com.hit.ptest.guard.AbstractParallelSafetyTest` và `com.hit.ptest.propagation.BindingHeaderInterceptor`. Các lớp public
 khác là nội bộ, có thể đổi không báo trước.

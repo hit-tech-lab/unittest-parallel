@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.zaxxer.hikari.HikariDataSource;
 import demo.core.DemoApp;
-import io.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelSpringTest;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

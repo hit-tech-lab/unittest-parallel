@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import demo.core.Account;
 import demo.core.AccountRepository;
 import demo.core.DemoApp;
-import io.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelSpringTest;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.UUID;

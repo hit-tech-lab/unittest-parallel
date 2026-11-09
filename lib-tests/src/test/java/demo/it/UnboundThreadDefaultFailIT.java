@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import demo.core.ExchangeRateClient;
-import io.hit.ptest.ParallelTest;
-import io.hit.ptest.ParallelTestException;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.ParallelTest;
+import com.hit.ptest.ParallelTestException;
+import com.hit.ptest.PerTestMock;
 import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

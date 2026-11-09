@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 
 import demo.core.ExchangeRateClient;
 import demo.support.Rendezvous;
-import io.hit.ptest.ParallelTest;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.ParallelTest;
+import com.hit.ptest.PerTestMock;
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicNode;

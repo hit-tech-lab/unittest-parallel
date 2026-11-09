@@ -40,7 +40,7 @@ abstract class HttpBase extends MainIT {
     protected RestClient withBinding() {
         return RestClient.builder()
                 .baseUrl("http://localhost:" + port)
-                .requestInterceptor(new BindingHeaderInterceptor())   // io.hit.ptest.propagation
+                .requestInterceptor(new BindingHeaderInterceptor())   // com.hit.ptest.propagation
                 .build();
     }
 }

@@ -2,7 +2,7 @@ package demo.it;
 
 import demo.core.DemoApp;
 import demo.support.SharedStateBase;
-import io.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelSpringTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /** Cùng cấu hình với MainIT (cùng tên "main") để dùng chung context; cho phép kế thừa SharedStateBase. */

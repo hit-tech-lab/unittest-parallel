@@ -6,7 +6,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestSpy;
 import demo.core.Account;
 import demo.core.TransferService;
 import demo.support.Rendezvous;

@@ -3,10 +3,10 @@ package demo.it;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import demo.core.DemoApp;
 import demo.core.ExchangeRateClient;
-import io.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelSpringTest;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

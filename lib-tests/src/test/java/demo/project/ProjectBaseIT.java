@@ -3,10 +3,10 @@ package demo.project;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import demo.support.Rendezvous;
-import io.hit.ptest.ParallelSpringTest;
-import io.hit.ptest.ParallelTest;
-import io.hit.ptest.PerTestMock;
-import io.hit.ptest.PerTestMocks;
+import com.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelTest;
+import com.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;

@@ -1,6 +1,6 @@
 package demo.it;
 
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestSpy;
 import demo.core.AccountRepository;
 import demo.core.AuditLog;
 import demo.core.FinalPricer;

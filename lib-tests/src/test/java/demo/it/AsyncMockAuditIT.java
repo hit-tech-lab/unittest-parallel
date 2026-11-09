@@ -4,7 +4,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import demo.core.AuditLog;
 import demo.support.Rendezvous;
 import org.junit.jupiter.api.Test;

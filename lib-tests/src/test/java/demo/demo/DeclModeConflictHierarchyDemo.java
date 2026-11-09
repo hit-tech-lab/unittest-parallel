@@ -1,7 +1,7 @@
 package demo.demo;
 
 import demo.project.PricingService;
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestSpy;
 import org.junit.jupiter.api.Test;
 
 /** Negative control: lớp cơ sở mock, lớp con spy cùng bean => MODE_CONFLICT. */

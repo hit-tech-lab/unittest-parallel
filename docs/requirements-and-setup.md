@@ -34,7 +34,7 @@ khi so sánh.
 
 ```xml
 <dependency>
-    <groupId>io.hit.research</groupId>
+    <groupId>com.hit.research</groupId>
     <artifactId>parallel-test-lib</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <scope>test</scope>

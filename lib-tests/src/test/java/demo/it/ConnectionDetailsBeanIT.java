@@ -3,8 +3,8 @@ package demo.it;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import demo.core.DemoApp;
-import io.hit.ptest.ParallelSpringTest;
-import io.hit.ptest.SuppressGuard;
+import com.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.SuppressGuard;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.stream.Stream;

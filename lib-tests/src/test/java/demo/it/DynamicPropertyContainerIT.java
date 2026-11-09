@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import demo.core.DemoApp;
 import demo.support.SharedPostgres;
-import io.hit.ptest.ParallelSpringTest;
-import io.hit.ptest.SuppressGuard;
+import com.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.SuppressGuard;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

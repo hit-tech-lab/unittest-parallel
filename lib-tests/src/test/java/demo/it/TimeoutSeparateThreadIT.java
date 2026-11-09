@@ -5,8 +5,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import demo.core.ExchangeRateClient;
-import io.hit.ptest.ParallelTest;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.ParallelTest;
+import com.hit.ptest.PerTestMock;
 import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;

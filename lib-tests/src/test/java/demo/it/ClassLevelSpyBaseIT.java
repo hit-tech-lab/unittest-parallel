@@ -1,7 +1,7 @@
 package demo.it;
 
 import demo.core.ExchangeRateClient;
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestSpy;
 
 /**
  * Lớp cơ sở khai {@code @PerTestSpy} CẤP CLASS: mỗi test của lớp con có sẵn một spy riêng của {@code primaryFx} (không đổi khóa

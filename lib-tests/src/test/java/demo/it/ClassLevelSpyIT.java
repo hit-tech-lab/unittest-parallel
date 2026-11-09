@@ -5,7 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import demo.core.ExchangeRateClient;
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestSpy;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Qualifier;

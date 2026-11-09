@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 
 import demo.core.ExchangeRateClient;
 import demo.support.Rendezvous;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Qualifier;

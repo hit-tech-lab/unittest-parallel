@@ -4,7 +4,7 @@ Repository gồm hai module Maven:
 
 | Module | Vai trò |
 |---|---|
-| `parallel-test-lib` | thư viện `io.hit.ptest` và test đơn vị của nó |
+| `parallel-test-lib` | thư viện `com.hit.ptest` và test đơn vị của nó |
 | `lib-tests` | ứng dụng mẫu `demo.core.*`, `demo.project.*`, `demo.audit.*` và bộ test tích hợp (`*IT`) chỉ dùng API công khai; `*Demo` là đối chứng âm cố ý fail |
 
 Các ví dụ trong tài liệu lấy từ `lib-tests`.

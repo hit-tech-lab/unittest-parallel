@@ -3,7 +3,7 @@ package demo.demo;
 import demo.audit.AuditApp;
 import demo.audit.AuditRecord;
 import demo.audit.AuditRecordRepository;
-import io.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelSpringTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

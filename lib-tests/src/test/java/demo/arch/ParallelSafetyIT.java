@@ -1,6 +1,6 @@
 package demo.arch;
 
-import io.hit.ptest.guard.AbstractParallelSafetyTest;
+import com.hit.ptest.guard.AbstractParallelSafetyTest;
 
 /**
  * Quét tĩnh toàn bộ code test của consumer (trừ package demo.demo = negative control): phải sạch vi phạm FAIL.

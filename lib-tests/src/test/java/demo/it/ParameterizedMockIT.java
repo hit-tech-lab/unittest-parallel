@@ -5,7 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import demo.core.ExchangeRateClient;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import java.math.BigDecimal;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

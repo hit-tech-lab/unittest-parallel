@@ -2,7 +2,7 @@ package demo.it;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestSpy;
 import demo.core.StatefulCounter;
 import demo.support.Rendezvous;
 import org.junit.jupiter.api.Test;

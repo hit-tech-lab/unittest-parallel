@@ -1,8 +1,8 @@
-# Guard an toàn song song (`io.hit.ptest.guard`)
+# Guard an toàn song song (`com.hit.ptest.guard`)
 
 Guard biến các quy tắc "test chạy song song phải an toàn" thành lỗi build có mã ổn định, chỉ đúng lớp/dòng/test,
 kèm lý do và cách sửa. Nó dùng được **độc lập với cơ chế can thiệp bean** (REAL/SPY/MOCK): chỉ phụ thuộc API gốc
-`io.hit.ptest` (annotation, exception) cùng Spring/JUnit. Khi dùng cùng `@ParallelSpringTest`, guard tự chạy, không
+`com.hit.ptest` (annotation, exception) cùng Spring/JUnit. Khi dùng cùng `@ParallelSpringTest`, guard tự chạy, không
 cần khai báo thêm; khi dùng riêng, chỉ cần `AbstractParallelSafetyTest` (quét tĩnh) và `JdbcSqlGuardPostProcessor`
 (chặn SQL).
 
@@ -126,8 +126,8 @@ CONTEXT_LIMIT_EXCEEDED: cannot create context 'over-limit@4bd57b9e#11': 10 conte
   truyền binding: bean bị mock/spy bị gọi từ thread reactor rơi vào chính sách `ptest.unbound-policy`; dùng `ParallelTest.wrap` ở ranh giới đó.
 - **Mockito >= 5** (mock maker inline mặc định): wrapper và host của spy là mock của lớp cụ thể kể cả `final`. Thư viện kiểm tra khi tạo context đầu tiên và ném
   `CONFIG` nếu không mock được lớp final (Mockito 4 chưa bật inline, hoặc mock maker subclass).
-- **Phạm vi API công khai**: người dùng chỉ dùng `io.hit.ptest` (`@ParallelSpringTest`, `@PerTestMock`/`@PerTestSpy`, `@SuppressGuard`, `ParallelTest`,
-  `ParallelTestException`, `UnboundPolicy`) và `io.hit.ptest.guard.AbstractParallelSafetyTest`. Mọi lớp/phương thức public khác (ví dụ `ContextRegistry.INSTANCE`,
+- **Phạm vi API công khai**: người dùng chỉ dùng `com.hit.ptest` (`@ParallelSpringTest`, `@PerTestMock`/`@PerTestSpy`, `@SuppressGuard`, `ParallelTest`,
+  `ParallelTestException`, `UnboundPolicy`) và `com.hit.ptest.guard.AbstractParallelSafetyTest`. Mọi lớp/phương thức public khác (ví dụ `ContextRegistry.INSTANCE`,
   `PostgresProvisioner.setStarterForTest/resetForTest`, `GuardScope.useOwnerResolver`, `InterceptMode`) là NỘI BỘ (public chỉ vì các package nội bộ gọi nhau,
   có ArchUnit khóa chiều phụ thuộc), có thể đổi không báo trước.
 - Việc gán vi phạm cho test chỉ hoạt động khi thread mang binding của ptest; thread không binding chỉ được ghi log "belongs to no running test".
@@ -137,7 +137,7 @@ CONTEXT_LIMIT_EXCEEDED: cannot create context 'over-limit@4bd57b9e#11': 10 conte
 
 ## 5. Bằng chứng kiểm tra
 
-- Test đơn vị của thư viện (`parallel-test-lib/src/test/java/io/hit/ptest/guard`, `context/ContextBudgetDiffTest`,
+- Test đơn vị của thư viện (`parallel-test-lib/src/test/java/com/hit/ptest/guard`, `context/ContextBudgetDiffTest`,
   `arch/PackageArchitectureTest`): mỗi luật có lớp mẫu vi phạm (`Bad*`) và lớp đúng tương ứng (`Good*`); SQL kiểm tra trên H2 thật;
   ArchUnit khóa chiều phụ thuộc (guard chỉ phụ thuộc API gốc; chỉ `context` và `junit` được gọi guard).
 - `lib-tests` (consumer chỉ dùng API công khai): `ParallelSafetyIT` (quét sạch source set), các `Guard*Demo` trong profile

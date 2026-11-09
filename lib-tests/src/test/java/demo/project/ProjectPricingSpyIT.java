@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestSpy;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 

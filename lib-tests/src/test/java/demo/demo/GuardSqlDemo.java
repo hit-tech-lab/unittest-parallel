@@ -3,8 +3,8 @@ package demo.demo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import demo.core.DemoApp;
-import io.hit.ptest.ParallelSpringTest;
-import io.hit.ptest.ParallelTest;
+import com.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelTest;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;

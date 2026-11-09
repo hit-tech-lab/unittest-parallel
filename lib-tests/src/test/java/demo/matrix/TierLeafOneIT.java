@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import demo.project.Ports;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import org.junit.jupiter.api.Test;
 
 /** Lá dưới tầng C, có field handle; thấy đủ mock của cả ba tầng. */

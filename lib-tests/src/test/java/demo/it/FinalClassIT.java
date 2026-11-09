@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 
 import demo.core.FinalPricer;
 import demo.support.Rendezvous;
-import io.hit.ptest.PerTestMock;
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestSpy;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 

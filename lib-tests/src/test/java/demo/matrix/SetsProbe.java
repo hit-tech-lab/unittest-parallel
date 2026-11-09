@@ -3,7 +3,7 @@ package demo.matrix;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import demo.support.Rendezvous;
-import io.hit.ptest.ParallelTest;
+import com.hit.ptest.ParallelTest;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.context.ApplicationContext;

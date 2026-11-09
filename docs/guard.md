@@ -63,7 +63,7 @@ Kế thừa MỘT lần để liệt kê mọi vi phạm tĩnh của toàn bộ 
 ```java
 package demo.arch;
 
-import io.hit.ptest.guard.AbstractParallelSafetyTest;
+import com.hit.ptest.guard.AbstractParallelSafetyTest;
 
 class ParallelSafetyIT extends AbstractParallelSafetyTest {
 }

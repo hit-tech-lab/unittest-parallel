@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import demo.audit.AuditApp;
 import demo.audit.AuditRecord;
 import demo.audit.AuditRecordRepository;
-import io.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelSpringTest;
 import java.util.UUID;
 import org.junit.jupiter.api.RepeatedTest;
 import org.springframework.beans.factory.annotation.Autowired;

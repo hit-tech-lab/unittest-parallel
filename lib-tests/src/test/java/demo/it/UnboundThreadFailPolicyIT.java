@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import demo.core.DemoApp;
 import demo.core.ExchangeRateClient;
-import io.hit.ptest.ParallelSpringTest;
-import io.hit.ptest.ParallelTestException;
+import com.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.ParallelTestException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Test;

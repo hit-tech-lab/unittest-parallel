@@ -10,8 +10,8 @@ import demo.core.Account;
 import demo.core.AccountNotFoundException;
 import demo.core.AccountRepository;
 import demo.core.TransferService;
-import io.hit.ptest.PerTestMock;
-import io.hit.ptest.PerTestSpy;
+import com.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestSpy;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 

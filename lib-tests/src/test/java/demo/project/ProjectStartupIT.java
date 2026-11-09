@@ -3,7 +3,7 @@ package demo.project;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import org.junit.jupiter.api.Test;
 
 /** Bean mock-only được gọi trong @PostConstruct (chưa có test/binding): nhận mặc định Mockito và mock của test sau đó không thấy lời gọi đó. */

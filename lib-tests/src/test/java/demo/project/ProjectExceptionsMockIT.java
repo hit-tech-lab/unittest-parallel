@@ -3,7 +3,7 @@ package demo.project;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import org.junit.jupiter.api.Test;
 
 /** Bean ĐÃ có trong context (không phải mock-only): mock chỉ trong lớp này, lớp ProjectExceptionsRealIT cùng context vẫn dùng bản thật. */

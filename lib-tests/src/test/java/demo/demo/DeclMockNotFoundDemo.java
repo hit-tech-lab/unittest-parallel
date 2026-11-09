@@ -2,7 +2,7 @@ package demo.demo;
 
 import demo.core.AuditLog;
 import demo.project.ProjectBaseIT;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import org.junit.jupiter.api.Test;
 
 /**

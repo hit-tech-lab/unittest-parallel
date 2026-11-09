@@ -3,17 +3,17 @@ package demo.it;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.PerTestMock;
 import org.springframework.beans.factory.annotation.Qualifier;
 import demo.core.ExchangeRateClient;
-import io.hit.ptest.ParallelTest;
-import io.hit.ptest.ParallelTestException;
+import com.hit.ptest.ParallelTest;
+import com.hit.ptest.ParallelTestException;
 import java.math.BigDecimal;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterAll;
-import io.hit.ptest.SuppressGuard;
+import com.hit.ptest.SuppressGuard;
 import org.junit.jupiter.api.Test;
 
 /** Tác vụ rò rỉ qua binding đã đóng: sau khi test kết thúc không được định tuyến vào mock cũ (6.6) mà phải lỗi rõ ràng. */

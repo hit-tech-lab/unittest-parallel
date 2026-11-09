@@ -2,8 +2,8 @@ package demo.demo;
 
 import demo.core.AuditLog;
 import demo.core.DemoApp;
-import io.hit.ptest.ParallelSpringTest;
-import io.hit.ptest.PerTestMock;
+import com.hit.ptest.ParallelSpringTest;
+import com.hit.ptest.PerTestMock;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

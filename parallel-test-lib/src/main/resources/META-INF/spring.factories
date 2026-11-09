@@ -1,1 +1,1 @@
-org.springframework.test.context.ContextCustomizerFactory=io.hit.ptest.context.ParallelContextCustomizerFactory
+org.springframework.test.context.ContextCustomizerFactory=com.hit.ptest.context.ParallelContextCustomizerFactory
