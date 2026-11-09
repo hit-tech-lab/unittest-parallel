@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Spring Boot 3.3.x (Spring Framework 6.1, JUnit 5, Mockito 5), Java 17 -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.5</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>io.hit.research</groupId>
+    <artifactId>ptest-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>ptest-parent</name>
+    <description>Thư viện chạy test Spring Boot song song (bản Spring Boot 3)</description>
+
+    <modules>
+        <module>parallel-test-lib</module>
+        <module>lib-tests</module>
+    </modules>
+
+    <properties>
+        <java.version>17</java.version>
+        <testcontainers2.version>2.0.5</testcontainers2.version>
+        <archunit.version>1.4.2</archunit.version>
+        <!-- Surefire 3.2.5 (mặc định của Boot 3.3.5) gán sai lớp/số test khi JUnit chạy song song; 3.5.x báo đúng -->
+        <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
+    </properties>
+</project>

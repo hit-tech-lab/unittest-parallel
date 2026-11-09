@@ -1,0 +1,5 @@
+target/
+*.log
+ptest-reports/
+.idea/
+*.iml

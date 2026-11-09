@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.hit.research</groupId>
+        <artifactId>ptest-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>lib-tests</artifactId>
+    <name>lib-tests</name>
+    <description>Consumer biet lap: chi dung API cong khai cua parallel-test-lib de chung minh cac ca A-F</description>
+
+    <properties>
+        <!-- chế độ DB: h2 | postgres ; cô lập Postgres: database | schema -->
+        <ptest.db.mode>h2</ptest.db.mode>
+        <ptest.db.isolation>database</ptest.db.isolation>
+        <ptest.max-contexts>40</ptest.max-contexts>
+        <!-- max_connections của container Postgres singleton (DbPoolConfigIT đọc lại bằng SHOW max_connections) -->
+        <ptest.db.postgres.max-connections>300</ptest.db.postgres.max-connections>
+        <!-- Guard: pool >= số thread song song (PT11); quét tĩnh bỏ qua package demo (âm), profile conflict-demo bỏ loại trừ để quét bắt chúng -->
+        <ptest.guard.scan-exclude>demo.demo.</ptest.guard.scan-exclude>
+        <test.forks>1</test.forks>
+        <test.parallelism>24</test.parallelism>
+        <test.includes>**/*IT.java</test.includes>
+        <test.failureIgnore>false</test.failureIgnore>
+        <!-- Truyền chế độ DB qua argLine (không phải systemPropertyVariables) để lần "auto" có thể BỎ HẲN property: -Dtest.dbmode.arg= -->
+        <test.dbmode.arg>-Dptest.db.mode=${ptest.db.mode}</test.dbmode.arg>
+        <test.groups></test.groups>
+        <test.excludedGroups>auto-default</test.excludedGroups>
+        <test.argLine>-Xshare:off -Dptest.test.agent=false -Dfork.number=${surefire.forkNumber} ${test.dbmode.arg}</test.argLine>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.hit.research</groupId>
+            <artifactId>parallel-test-lib</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <version>${testcontainers2.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+            <version>${archunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>${test.argLine}</argLine>
+                    <includes><include>${test.includes}</include></includes>
+                    <groups>${test.groups}</groups>
+                    <excludedGroups>${test.excludedGroups}</excludedGroups>
+                    <testFailureIgnore>${test.failureIgnore}</testFailureIgnore>
+                    <forkCount>${test.forks}</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <systemPropertyVariables>
+                        <ptest.db.isolation>${ptest.db.isolation}</ptest.db.isolation>
+                        <ptest.max-contexts>${ptest.max-contexts}</ptest.max-contexts>
+                        <ptest.db.postgres.max-connections>${ptest.db.postgres.max-connections}</ptest.db.postgres.max-connections>
+                        <ptest.db.pool-size>${test.parallelism}</ptest.db.pool-size>
+                        <!-- Cache context của Spring phải >= ptest.max-contexts (mặc định 32); KHÔNG đặt hikari.minimum-idle: mặc định của thư viện là thứ DbPoolConfigIT đo -->
+                        <spring.test.context.cache.maxSize>64</spring.test.context.cache.maxSize>
+                        <ptest.guard.scan-exclude>${ptest.guard.scan-exclude}</ptest.guard.scan-exclude>
+                        <ptest.report.dir>${project.build.directory}/ptest-reports</ptest.report.dir>
+                        <junit.jupiter.execution.parallel.config.fixed.parallelism>${test.parallelism}</junit.jupiter.execution.parallel.config.fixed.parallelism>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Đối chứng âm: chỉ chạy các *Demo có chủ ý xung đột/không hỗ trợ; PHẢI fail, script kiểm tra -->
+        <profile>
+            <id>conflict-demo</id>
+            <properties>
+                <test.includes>**/*Demo.java</test.includes>
+                <test.failureIgnore>true</test.failureIgnore>
+                <ptest.guard.scan-exclude></ptest.guard.scan-exclude>
+            </properties>
+        </profile>
+    </profiles>
+</project>
