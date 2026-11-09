@@ -28,6 +28,7 @@ Danh sách cấm mặc định của PT07: `CrudRepository#deleteAll()`, `#count
 ## Cấu hình `ptest.guard.*`
 
 Đọc lại mỗi lần dùng qua `SpringProperties`: file `spring.properties` ở gốc classpath trước, rồi system property `-D`.
+Đặt trong `application.yml` bị bỏ qua (có WARN); xem [Cấu hình `ptest.*`](configuration.md).
 
 | Khóa | Giá trị | Mặc định | Tác dụng |
 |---|---|---|---|

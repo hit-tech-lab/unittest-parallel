@@ -126,10 +126,14 @@ public final class BeanDeclarations {
     private static void add(Map<String, ClassDecl> byKey, List<ClassDecl> decls) {
         for (ClassDecl d : decls) {
             ClassDecl previous = byKey.putIfAbsent(d.key(), d);
-            if (previous == null || (previous.type().equals(d.type()) && previous.mode() == d.mode())) {
+            if (previous == null) {
                 continue;
             }
-            if (!previous.type().equals(d.type())) {
+            boolean sameType = previous.type().equals(d.type());
+            if (sameType && previous.mode() == d.mode()) {
+                continue;
+            }
+            if (!sameType) {
                 // cùng khóa (cùng name hoặc cùng kiểu) mà khác kiểu: nguyên nhân là hai kiểu cho một tên, dù chế độ có khác nhau hay không
                 throw new ParallelTestException.Config("MOCK_ONLY_CONFLICT: bean '" + d.name() + "' is declared with two types: " + previous.describe()
                         + " and " + d.describe() + ". Use one type or different name values.");

@@ -1,6 +1,7 @@
 package com.hit.ptest.db;
 
 import com.hit.ptest.ParallelTestException;
+import com.hit.ptest.config.PtestKeys;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -102,7 +103,7 @@ public final class PostgresProvisioner implements DatabaseProvisioner {
     /** Container là singleton của JVM: image yêu cầu ở context sau bị bỏ qua. Trả về cảnh báo hoặc null. */
     public static String imageMismatchWarning(String started, String requested) {
         return started.equals(requested) ? null
-                : "ptest.db.postgres.image=" + requested + " is IGNORED: this JVM already started the singleton Postgres container with image "
+                : PtestKeys.DB_POSTGRES_IMAGE + "=" + requested + " is IGNORED: this JVM already started the singleton Postgres container with image "
                 + started + " (the first context decides the image)";
     }
 

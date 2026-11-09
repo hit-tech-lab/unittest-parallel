@@ -2,6 +2,7 @@ package com.hit.ptest.context;
 
 import com.hit.ptest.ParallelSpringTest;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public record ContextDeclaration(String name, List<String> wrap, List<String> ex
     }
 
     private static List<String> sorted(String[] values) {
-        return List.of(values).stream().sorted().toList();
+        return Arrays.stream(values).sorted().toList();
     }
 
     /** Cùng khai báo như nhau ở phần dùng để phát hiện gõ nhầm tên context (không tính mock-only: đó chỉ tách context). */

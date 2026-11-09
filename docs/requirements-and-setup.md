@@ -98,6 +98,8 @@ junit.jupiter.execution.parallel.config.fixed.parallelism=4
 
 Hai nhóm đọc từ hai nơi khác nhau.
 
+Tổng hợp mọi key, nơi đặt và cảnh báo khi đặt sai chỗ: xem [Cấu hình `ptest.*`](configuration.md).
+
 **Toàn cục** (đọc qua `SpringProperties`: file `spring.properties` ở gốc classpath TRƯỚC, rồi system property `-D`):
 
 | Khóa | Mặc định | Tác dụng |

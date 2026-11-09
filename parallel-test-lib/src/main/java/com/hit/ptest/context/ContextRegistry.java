@@ -181,7 +181,7 @@ public final class ContextRegistry {
                 }
             }
         });
-        return sb.length() == 0 ? "  (no shutdown thread alive: the contexts are not being closed by any shutdown hook)" : sb.toString();
+        return sb.isEmpty() ? "  (no shutdown thread alive: the contexts are not being closed by any shutdown hook)" : sb.toString();
     }
 
     public synchronized Map<String, String> snapshot() {

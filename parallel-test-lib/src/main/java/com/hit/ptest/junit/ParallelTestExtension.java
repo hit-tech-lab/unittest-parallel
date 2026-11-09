@@ -273,7 +273,7 @@ public final class ParallelTestExtension implements BeforeAllCallback, AfterAllC
 
     /**
      * Gán mock/spy của test vào field. PER_CLASS dùng chung một instance cho các method nên chỉ an toàn khi các method không chạy
-     * đồng thời ({@link ClassRules#methodsMayRunConcurrently}); khi đó mỗi method nhận handle mới (xóa ở {@link #afterEach}).
+     * đồng thời ({@link ClassRules#methodsMayRunConcurrently(Class)}); khi đó mỗi method nhận handle mới (xóa ở {@link #afterEach}).
      */
     private void injectFields(ExtensionContext ec, List<ResolvedRequest> allRequests, State state) {
         List<ResolvedRequest> fields = allRequests.stream().filter(r -> r.request().field() != null).toList(); // spy cấp class không có field

@@ -1,6 +1,7 @@
 package com.hit.ptest.context;
 
 import com.hit.ptest.ParallelTestException;
+import com.hit.ptest.config.PtestKeys;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
@@ -17,12 +18,12 @@ import org.springframework.core.SpringProperties;
  */
 public final class PtestSettings {
 
-    static final String PROP_MAX = "ptest.max-contexts";
-    static final String PROP_UNSUPPORTED = "ptest.unsupported";
+    static final String PROP_MAX = PtestKeys.MAX_CONTEXTS;
+    static final String PROP_UNSUPPORTED = PtestKeys.UNSUPPORTED;
     static final String PROP_FORK = "fork.number";
-    static final String PROP_REPORT_DIR = "ptest.report.dir";
+    static final String PROP_REPORT_DIR = PtestKeys.REPORT_DIR;
     static final String PROP_SPRING_CACHE = "spring.test.context.cache.maxSize";
-    static final String PROP_EXIT_WAIT = "ptest.report.exit-wait-millis";
+    static final String PROP_EXIT_WAIT = PtestKeys.REPORT_EXIT_WAIT_MILLIS;
     static final long DEFAULT_EXIT_WAIT_MILLIS = 20_000;
     static final int DEFAULT_MAX = 8;
     static final int DEFAULT_SPRING_CACHE = 32;

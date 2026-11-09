@@ -1,6 +1,7 @@
 package com.hit.ptest.guard;
 
 import com.hit.ptest.ParallelTestException;
+import com.hit.ptest.config.PtestKeys;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,7 @@ import org.springframework.core.SpringProperties;
  */
 public final class GuardSettings {
 
-    static final String PREFIX = "ptest.guard.";
+    static final String PREFIX = PtestKeys.GUARD_PREFIX;
     static final List<String> DEFAULT_FORBIDDEN_CALLS = List.of(
             "org.springframework.data.repository.CrudRepository#deleteAll()",
             "org.springframework.data.repository.CrudRepository#count()",

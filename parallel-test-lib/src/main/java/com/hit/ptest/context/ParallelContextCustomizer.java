@@ -2,6 +2,7 @@ package com.hit.ptest.context;
 
 import com.hit.ptest.ParallelTestException;
 import com.hit.ptest.UnboundPolicy;
+import com.hit.ptest.config.PtestKeys;
 import com.hit.ptest.db.DatabaseProvisioner;
 import com.hit.ptest.db.H2Provisioner;
 import com.hit.ptest.db.PostgresProvisioner;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.test.context.ContextCustomizer;
@@ -45,14 +47,7 @@ import org.springframework.util.ClassUtils;
  */
 public final class ParallelContextCustomizer implements ContextCustomizer {
 
-    static final String PROP_DB_MODE = "ptest.db.mode";
-    static final String PROP_ISOLATION = "ptest.db.isolation";
-    static final String PROP_H2_OPTIONS = "ptest.db.h2.options";
-    static final String PROP_IMAGE = "ptest.db.postgres.image";
-    static final String PROP_MAX_CONNECTIONS = "ptest.db.postgres.max-connections";
     static final int DEFAULT_MAX_CONNECTIONS = 300;
-    static final String PROP_POOL = "ptest.db.pool-size";
-    static final String PROP_UNBOUND = "ptest.unbound-policy";
     static final int MIN_POOL = 4;
     static final String DEFAULT_IMAGE = "postgres:16.4";
     static final String LIFECYCLE_BEAN = "ptestContextLifecycle";
@@ -81,6 +76,7 @@ public final class ParallelContextCustomizer implements ContextCustomizer {
         int max = PtestSettings.maxContexts();
         requireWithinSpringCache(max);
         PtestSettings.checkMockitoAgentOnce();
+        MisplacedGlobalKeys.warnOnce(env, SpringProperties::getProperty);
         UnboundPolicy policy = unboundPolicy(env);
 
         String key = name + "@" + Integer.toHexString(config.hashCode()) + "#" + SEQ.incrementAndGet();
@@ -106,15 +102,15 @@ public final class ParallelContextCustomizer implements ContextCustomizer {
         context.addBeanFactoryPostProcessor(bf -> ContextRegistry.INSTANCE.register(mc, max));
 
         Map<String, Object> info = new HashMap<>();
-        info.put("ptest.context.key", key);
-        info.put("ptest.context.name", name);
+        info.put(PtestKeys.CONTEXT_KEY, key);
+        info.put(PtestKeys.CONTEXT_NAME, name);
         env.getPropertySources().addFirst(new MapPropertySource("ptestContext", info));
         DatabaseProvisioner provisioner = provisioner(env);
-        mc.dbModeRequested = env.getProperty(PROP_DB_MODE, "auto").toLowerCase(Locale.ROOT);
+        mc.dbModeRequested = env.getProperty(PtestKeys.DB_MODE, "auto").toLowerCase(Locale.ROOT);
         mc.dbMode = provisioner == null ? "none" : provisioner.mode();
         if (provisioner != null) {
             env.getPropertySources().addLast(new ProvisionedDbPropertySource(mc, provisioner, declaration.schemas(),
-                    env.getProperty(PROP_POOL, Integer.toString(defaultPoolSize()))));
+                    env.getProperty(PtestKeys.DB_POOL_SIZE, Integer.toString(defaultPoolSize()))));
         }
 
         if (GuardSettings.severity(GuardRule.PT12) != Severity.OFF) {
@@ -147,11 +143,11 @@ public final class ParallelContextCustomizer implements ContextCustomizer {
     }
 
     private static UnboundPolicy unboundPolicy(ConfigurableEnvironment env) {
-        String value = env.getProperty(PROP_UNBOUND, "guarded").trim();
+        String value = env.getProperty(PtestKeys.UNBOUND_POLICY, "guarded").trim();
         try {
             return UnboundPolicy.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            throw new ParallelTestException.Config("CONFIG: unknown " + PROP_UNBOUND + "=" + value + " (fail|guarded|real)");
+            throw new ParallelTestException.Config("CONFIG: unknown " + PtestKeys.UNBOUND_POLICY + "=" + value + " (fail|guarded|real)");
         }
     }
 
@@ -160,22 +156,22 @@ public final class ParallelContextCustomizer implements ContextCustomizer {
      * cấp DB khi context hỏi spring.datasource.url mà người dùng chưa tự đặt.
      */
     private DatabaseProvisioner provisioner(ConfigurableEnvironment env) {
-        String mode = env.getProperty(PROP_DB_MODE, "auto").trim().toLowerCase(Locale.ROOT);
+        String mode = env.getProperty(PtestKeys.DB_MODE, "auto").trim().toLowerCase(Locale.ROOT);
         return switch (mode) {
             case "none" -> null;
-            case "auto" -> ClassUtils.isPresent("org.h2.Driver", null) ? new H2Provisioner(env.getProperty(PROP_H2_OPTIONS, "")) : null;
-            case "h2" -> new H2Provisioner(env.getProperty(PROP_H2_OPTIONS, ""));
+            case "auto" -> ClassUtils.isPresent("org.h2.Driver", null) ? new H2Provisioner(env.getProperty(PtestKeys.DB_H2_OPTIONS, "")) : null;
+            case "h2" -> new H2Provisioner(env.getProperty(PtestKeys.DB_H2_OPTIONS, ""));
             case "postgres" -> {
                 if (!ClassUtils.isPresent("org.testcontainers.postgresql.PostgreSQLContainer", null)) {
-                    throw new ParallelTestException.Config("CONFIG: ptest.db.mode=postgres needs Testcontainers >= 2.0 (artifact org.testcontainers:testcontainers-postgresql, class org.testcontainers.postgresql.PostgreSQLContainer; "
+                    throw new ParallelTestException.Config("CONFIG: " + PtestKeys.DB_MODE + "=postgres needs Testcontainers >= 2.0 (artifact org.testcontainers:testcontainers-postgresql, class org.testcontainers.postgresql.PostgreSQLContainer; "
                             + "Testcontainers 1.x is not supported) and the postgresql driver on the test classpath");
                 }
-                int maxConnections = Integer.parseInt(env.getProperty(PROP_MAX_CONNECTIONS, Integer.toString(DEFAULT_MAX_CONNECTIONS)).trim());
+                int maxConnections = Integer.parseInt(env.getProperty(PtestKeys.DB_POSTGRES_MAX_CONNECTIONS, Integer.toString(DEFAULT_MAX_CONNECTIONS)).trim());
                 warnIfConnectionsMayExceed(env, maxConnections);
-                yield new PostgresProvisioner(env.getProperty(PROP_IMAGE, DEFAULT_IMAGE),
-                        "schema".equalsIgnoreCase(env.getProperty(PROP_ISOLATION, "database")), maxConnections);
+                yield new PostgresProvisioner(env.getProperty(PtestKeys.DB_POSTGRES_IMAGE, DEFAULT_IMAGE),
+                        "schema".equalsIgnoreCase(env.getProperty(PtestKeys.DB_ISOLATION, "database")), maxConnections);
             }
-            default -> throw new ParallelTestException.Config("CONFIG: unknown " + PROP_DB_MODE + "=" + mode + " (auto|h2|postgres|none)");
+            default -> throw new ParallelTestException.Config("CONFIG: unknown " + PtestKeys.DB_MODE + "=" + mode + " (auto|h2|postgres|none)");
         };
     }
 
@@ -184,12 +180,13 @@ public final class ParallelContextCustomizer implements ContextCustomizer {
      * thư viện đặt {@code minimum-idle=1} nên thực tế thấp hơn nhiều).
      */
     private static void warnIfConnectionsMayExceed(ConfigurableEnvironment env, int maxConnections) {
-        int pool = Integer.parseInt(env.getProperty(PROP_POOL, Integer.toString(defaultPoolSize())).trim());
+        int pool = Integer.parseInt(env.getProperty(PtestKeys.DB_POOL_SIZE, Integer.toString(defaultPoolSize())).trim());
         long worst = (long) PtestSettings.maxContexts() * pool;
         if (worst > maxConnections) {
-            LoggerFactory.getLogger(ParallelContextCustomizer.class).warn("ptest.max-contexts ({}) x pool size ({}) = {} may exceed "
-                    + "Postgres max_connections={}; raise {} or lower ptest.db.pool-size / ptest.max-contexts",
-                    PtestSettings.maxContexts(), pool, worst, maxConnections, PROP_MAX_CONNECTIONS);
+            LoggerFactory.getLogger(ParallelContextCustomizer.class).warn("{} ({}) x pool size ({}) = {} may exceed "
+                    + "Postgres max_connections={}; raise {} or lower {} / {}",
+                    PtestKeys.MAX_CONTEXTS, PtestSettings.maxContexts(), pool, worst, maxConnections,
+                    PtestKeys.DB_POSTGRES_MAX_CONNECTIONS, PtestKeys.DB_POOL_SIZE, PtestKeys.MAX_CONTEXTS);
         }
     }
 
@@ -197,7 +194,7 @@ public final class ParallelContextCustomizer implements ContextCustomizer {
     static void requireWithinSpringCache(int max) {
         int springMax = PtestSettings.springCacheMaxSize();
         if (max > springMax) {
-            throw new ParallelTestException.Config("CONFIG: ptest.max-contexts=" + max
+            throw new ParallelTestException.Config("CONFIG: " + PtestKeys.MAX_CONTEXTS + "=" + max
                     + " exceeds spring.test.context.cache.maxSize=" + springMax
                     + ": Spring would evict (close) contexts that are still in use");
         }

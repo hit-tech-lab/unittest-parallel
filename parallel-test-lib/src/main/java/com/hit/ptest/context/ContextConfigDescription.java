@@ -68,8 +68,8 @@ final class ContextConfigDescription {
         keys.addAll(existing.keySet());
         for (String k : keys) {
             if (!Objects.equals(existing.get(k), created.get(k))) {
-                out.add("    * " + k + ":\n        existing: " + (existing.containsKey(k) ? existing.get(k) : "(not declared)")
-                        + "\n        new:      " + (created.containsKey(k) ? created.get(k) : "(not declared)"));
+                out.add("    * " + k + ":\n        existing: " + existing.getOrDefault(k, "(not declared)")
+                        + "\n        new:      " + created.getOrDefault(k, "(not declared)"));
             }
         }
         return out;

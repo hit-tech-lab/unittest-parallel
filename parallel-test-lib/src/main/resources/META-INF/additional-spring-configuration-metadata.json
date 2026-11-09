@@ -1,0 +1,71 @@
+{
+  "properties": [
+    {
+      "name": "ptest.db.mode",
+      "type": "java.lang.String",
+      "defaultValue": "auto",
+      "description": "Chế độ cấp DB riêng cho mỗi context. auto: H2 nếu có trên classpath, ngược lại không cấp; none: không cấp. Chỉ cấp khi context hỏi spring.datasource.url mà người dùng chưa tự đặt."
+    },
+    {
+      "name": "ptest.db.isolation",
+      "type": "java.lang.String",
+      "defaultValue": "database",
+      "description": "Cách cô lập khi dùng postgres: database (mỗi context một database) hoặc schema (mỗi context một schema)."
+    },
+    {
+      "name": "ptest.db.h2.options",
+      "type": "java.lang.String",
+      "defaultValue": "",
+      "description": "Phần options nối vào URL H2 của mỗi context, ví dụ ;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;"
+    },
+    {
+      "name": "ptest.db.postgres.image",
+      "type": "java.lang.String",
+      "defaultValue": "postgres:16.4",
+      "description": "Image Docker của Postgres (Testcontainers). Container là singleton của JVM nên chỉ context đầu tiên quyết định image."
+    },
+    {
+      "name": "ptest.db.postgres.max-connections",
+      "type": "java.lang.Integer",
+      "defaultValue": 300,
+      "description": "Giá trị max_connections của container Postgres. Thư viện cảnh báo nếu ptest.max-contexts nhân cỡ pool vượt giá trị này."
+    },
+    {
+      "name": "ptest.db.pool-size",
+      "type": "java.lang.Integer",
+      "description": "Cỡ pool kết nối mỗi context. Mặc định là max(4, số thread song song của JUnit) nên không có giá trị cố định."
+    },
+    {
+      "name": "ptest.unbound-policy",
+      "type": "java.lang.String",
+      "defaultValue": "guarded",
+      "description": "Hành vi khi thread không có binding của test gọi bean can thiệp sau khi context khởi động xong. guarded: gọi bean thật cho tới khi có test khai mock/spy cho bean đó; fail: luôn ném lỗi; real: luôn gọi bean thật (có cảnh báo)."
+    }
+  ],
+  "hints": [
+    {
+      "name": "ptest.db.mode",
+      "values": [
+        { "value": "auto", "description": "H2 nếu có trên classpath, ngược lại không cấp DB." },
+        { "value": "h2", "description": "Luôn dùng H2 in-memory." },
+        { "value": "postgres", "description": "Postgres qua Testcontainers (>= 2.0)." },
+        { "value": "none", "description": "Không cấp DB." }
+      ]
+    },
+    {
+      "name": "ptest.db.isolation",
+      "values": [
+        { "value": "database", "description": "Mỗi context một database." },
+        { "value": "schema", "description": "Mỗi context một schema (khi không khai báo schemas)." }
+      ]
+    },
+    {
+      "name": "ptest.unbound-policy",
+      "values": [
+        { "value": "guarded", "description": "Gọi bean thật cho tới khi có test khai mock/spy cho bean." },
+        { "value": "fail", "description": "Luôn ném UnboundThread." },
+        { "value": "real", "description": "Luôn gọi bean thật (cảnh báo một lần)." }
+      ]
+    }
+  ]
+}

@@ -16,6 +16,7 @@ Thư viện `com.hit.ptest` cho phép các lớp test `@SpringBootTest` chạy s
 | [Khai báo mock/spy](docs/mock-spy-declaration.md) | Cấp class và field, chọn bean, REAL/SPY/MOCK, context nhóm, `@Nested`, `@TestFactory`... |
 | [Web và thread nền](docs/web-and-background-threads.md) | MOCK và RANDOM_PORT, `@Async`, `unbound-policy`, `ParallelTest.wrap` |
 | [Cơ sở dữ liệu](docs/database.md) | H2, Postgres (Testcontainers), `ptest.db.*`, `@ServiceConnection` |
+| [Cấu hình `ptest.*`](docs/configuration.md) | Bảng mọi key, nhóm theo context và nhóm toàn cục, nơi đặt đúng |
 | [Guard an toàn song song](docs/guard.md) | Mã PT01..PT13, cấu hình, cách viết test an toàn |
 | [Giới hạn đã biết](docs/limitations.md) | Giới hạn của thư viện và của JUnit |
 | [Di chuyển từ `@MockBean`/`@SpyBean`](docs/migration.md) | Bảng đối chiếu trước/sau |
