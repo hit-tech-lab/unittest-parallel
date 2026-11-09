@@ -74,8 +74,9 @@ final class MockOnlyBeans {
                 }
                 name = raw.getName() + "#" + n;
             }
-            registry.registerBeanDefinition(name, mockOnlyDefinition(owner, plan, name, bean.type(), raw, false,
-                    Set.of(beanFactory.getBeanNamesForType(bean.type(), true, false))));
+            RootBeanDefinition definition = mockOnlyDefinition(plan, name, bean.type(), raw, false, Set.of(beanFactory.getBeanNamesForType(bean.type(), true, false)));
+            registry.registerBeanDefinition(name, definition);
+            registerMock(beanFactory, owner, name, raw);
         }
     }
 
@@ -93,7 +94,7 @@ final class MockOnlyBeans {
                     + " has no bean definition (registered as a ready singleton), so its definition cannot be replaced.");
         }
         BeanDefinition original = beanFactory.getBeanDefinition(target);
-        RootBeanDefinition definition = mockOnlyDefinition(owner, plan, target, bean.type(), raw, true, Set.of());
+        RootBeanDefinition definition = mockOnlyDefinition(plan, target, bean.type(), raw, true, Set.of());
         definition.setPrimary(original.isPrimary());
         definition.setAutowireCandidate(original.isAutowireCandidate());
         copyFallback(original, definition);
@@ -120,6 +121,21 @@ final class MockOnlyBeans {
         copyClassLevelQualifiers(beanFactory.getType(target, false), definition);
         registry.removeBeanDefinition(target);
         registry.registerBeanDefinition(target, definition);
+        registerMock(beanFactory, owner, target, raw);
+    }
+
+    /**
+     * Tạo mock NGAY và đăng ký như singleton có sẵn (giống {@code @MockBean}: {@code registerSingleton} sau khi đăng ký định nghĩa), thay vì để
+     * Spring tạo qua instance supplier. Singleton có sẵn không đi qua vòng đời bean nên không bị BeanPostProcessor nào chạm vào: không bind
+     * {@code @ConfigurationProperties} (getter của mock trả null làm binder báo "No setter found"), không tiêm {@code @Autowired}, không chạy
+     * {@code @PostConstruct}, không bọc proxy AOP ({@code @Transactional}/{@code @Async}/{@code @Cacheable}). Định nghĩa đã đăng ký vẫn giữ để
+     * tra theo kiểu/qualifier/{@code @Primary}. Tên không thể đã có singleton: tên mới thì {@code isBeanNameInUse} đã loại, tên thay thế thì
+     * {@code removeBeanDefinition} đã hủy singleton cũ (nếu có) ngay trước đó.
+     */
+    private static void registerMock(ConfigurableListableBeanFactory beanFactory, InterceptOwner owner, String name, Class<?> raw) {
+        BeanInterceptor interceptor = BeanInterceptor.createMockOnly(owner, name, raw);
+        owner.register(name, interceptor);
+        beanFactory.registerSingleton(name, interceptor.wrapper);
     }
 
     /**
@@ -161,17 +177,16 @@ final class MockOnlyBeans {
         }
     }
 
-    private static RootBeanDefinition mockOnlyDefinition(InterceptOwner owner, InterceptPlan plan, String name, ResolvableType type, Class<?> raw,
+    /**
+     * Định nghĩa chỉ mang kiểu và metadata autowire; KHÔNG có instance supplier vì bean là singleton có sẵn ({@link #registerMock}). Nếu vì lý do
+     * nào đó Spring định tạo bean từ định nghĩa này thì sẽ báo lỗi rõ ràng thay vì âm thầm tạo mock đi qua post-processor.
+     */
+    private static RootBeanDefinition mockOnlyDefinition(InterceptPlan plan, String name, ResolvableType type, Class<?> raw,
                                                          boolean replaced, Set<String> knownBefore) {
         plan.markMockOnly(name, replaced, raw, knownBefore);
         RootBeanDefinition definition = new RootBeanDefinition();
         definition.setTargetType(type);
         definition.setRole(BeanDefinition.ROLE_APPLICATION);
-        definition.setInstanceSupplier(() -> {
-            BeanInterceptor interceptor = BeanInterceptor.createMockOnly(owner, name, raw);
-            owner.register(name, interceptor);
-            return interceptor.wrapper;
-        });
         return definition;
     }
 }

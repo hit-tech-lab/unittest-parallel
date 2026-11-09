@@ -14,6 +14,7 @@ Danh sách các hành vi khác Spring Test thường hoặc không khắc phục
 | Bean là JDK proxy (repository) không có lớp thật | spy ủy quyền cho proxy (giống `@MockitoSpyBean`) |
 | Tham chiếu vòng mà Spring lộ sớm bản thật của bean được bọc | không hỗ trợ (Spring báo lỗi "raw version") |
 | Mock cấp class tạo bean mới | `@ConditionalOnBean(MockedType)` của auto-configuration không thấy bean đó (khác `@MockBean`); đăng ký bằng `@Bean`/`@Import` trong cấu hình test để thư viện chỉ thay |
+| Mock cấp class so với `@MockBean` | không qua BeanPostProcessor như `@MockBean`; còn khác ở `@ConditionalOnBean`, thuộc tính định nghĩa không giữ khi thay và stub qua handle thay vì stub thẳng bean tiêm: xem [LIMITS.md](../parallel-test-lib/LIMITS.md) mục 4 |
 | `@PerTestSpy` trên bean đã bị `@PerTestMock` cấp class thay/tạo | `SPY_NO_BEAN`, không còn bản thật |
 | Lời gọi thứ hai vào method `@Cacheable` | được cache trả lời nên spy không thấy (như `@MockitoSpyBean`) |
 | Bean không được bọc mặc định (hạ tầng, `@ConfigurationProperties`, `FactoryBean`, prototype...) | không mock được theo test, trừ khi liệt kê tên trong `wrap` |

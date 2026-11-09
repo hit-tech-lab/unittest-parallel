@@ -48,8 +48,8 @@ final class BeanCandidates {
             return "framework/library type " + bean.getClass().getName();
         }
         if (isConfigurationProperties(def, types[0])) {
-            return "@ConfigurationProperties bean (configuration data bound from the environment; mock it with a class-level @PerTestMock "
-                    + "or list its name in wrap)";
+            return "@ConfigurationProperties bean (configuration data, not wrapped by default): replace it with a class-level "
+                    + "@PerTestMock (a mock like @MockBean) or list its name in wrap to wrap the real bean";
         }
         if (java.util.Arrays.stream(types).allMatch(BeanCandidates::isFrameworkType)) {
             // Bean do ứng dụng tự định nghĩa (@Bean ở lớp của ứng dụng) nhưng kiểu thuộc framework (RestTemplate, ObjectMapper, executor...)

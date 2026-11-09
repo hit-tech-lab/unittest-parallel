@@ -115,7 +115,7 @@ class ModeTwoSameTypeIT extends MainIT {
 ## Cấp class: như `@MockBean`
 
 Dùng cho cổng ra ngoài mà context test không có cài đặt (database tài liệu, mail, cache...). Thư viện tạo bean mock;
-`@PostConstruct`/kết nối ngoài của bean thật không bao giờ chạy. Đặt ở lớp cơ sở có `@ParallelSpringTest`.
+`@PostConstruct`/kết nối ngoài của bean thật không bao giờ chạy; mock được đăng ký như singleton có sẵn nên không qua BeanPostProcessor nào (bean `@ConfigurationProperties` chỉ có getter cũng khởi động được). Đặt ở lớp cơ sở có `@ParallelSpringTest`.
 Rút gọn từ `ProjectBaseIT` (bản đầy đủ khai 10 cổng và 3 gateway):
 
 ```java

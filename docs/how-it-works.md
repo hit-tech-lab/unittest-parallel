@@ -42,7 +42,7 @@ wrapper.method()
 
 Spy nằm BÊN TRONG proxy AOP nên advice vẫn bao quanh; bean là JDK proxy (repository) không có host nên spy là mock ủy quyền cho proxy.
 Chỉ bean khớp `wrap` và không bị `exclude`, là singleton do ứng dụng định nghĩa mới được bọc ([Khai báo mock/spy](mock-spy-declaration.md)).
-Mock cấp class đăng ký bean mock trực tiếp, không qua hai post-processor này.
+Mock cấp class được tạo ngay lúc dựng context và đăng ký như singleton có sẵn (kèm định nghĩa để tra theo kiểu/qualifier), nên không qua hai post-processor này và cũng không qua BeanPostProcessor nào khác (bind `@ConfigurationProperties`, `@Autowired`, `@PostConstruct`, proxy AOP).
 
 ## Binding của test
 

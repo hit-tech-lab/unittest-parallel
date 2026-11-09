@@ -14,7 +14,7 @@ import xml.etree.ElementTree as ET
 failures = []
 # tên context -> số context dự kiến (cùng tên "label" nhưng khác cấu hình Spring => 2 context)
 EXPECTED_CONTEXTS = {"main": 1, "alt": 1, "db-a": 1, "db-b": 1, "audit": 1, "policy-real": 1, "policy-fail": 1,
-                     "policy-guarded": 1, "user-url": 1, "svc-conn": 1, "details-bean": 1, "dyn-prop": 1, "label": 2, "cleanup-fail": 1, "cleanup-ok": 1, "cleanup-probe": 1, "cleanup-rollback": 1, "project": 1, "project-extra": 1, "replace": 1,
+                     "policy-guarded": 1, "user-url": 1, "svc-conn": 1, "details-bean": 1, "dyn-prop": 1, "label": 2, "cleanup-fail": 1, "cleanup-ok": 1, "cleanup-probe": 1, "cleanup-rollback": 1, "project": 1, "project-extra": 1, "replace": 1, "mockbean-props-getter-new": 1, "mockbean-props-getter-replaced": 1, "mockbean-props-setter": 1, "mockbean-skip-pp-new": 1, "mockbean-skip-pp-replaced": 1,
                      # đối tượng của các IT cấu hình/ma trận mới: db-pool*/pg-*: pool + max_connections + WARN; nested-ctx/tiers/sets/web-mock: khóa context
                      "db-pool": 1, "db-pool-user": 1, "pg-warn": 1, "pg-nowarn": 1, "nested-ctx": 2, "tiers": 2, "sets": 3, "web-mock": 1,
                      "a-context-name-much-longer-than-sixty-three-characters-so-that-postgres-would-truncate-the-identifier": 1}
@@ -28,9 +28,9 @@ def expected_contexts(mode):
 
 # context lỗi lúc cấp DB (rollback) không bao giờ có DB; mỗi context còn lại dùng 1 DB
 # (user-url / svc-conn / dyn-prop: người dùng sở hữu DataSource nên thư viện KHÔNG cấp DB; project: không có DataSource nên không ai hỏi URL)
-NO_DB_CONTEXTS = {"cleanup-rollback", "user-url", "svc-conn", "details-bean", "dyn-prop", "project", "project-extra", "replace", "pg-warn", "pg-nowarn"}
+NO_DB_CONTEXTS = {"cleanup-rollback", "user-url", "svc-conn", "details-bean", "dyn-prop", "project", "project-extra", "replace", "mockbean-props-getter-new", "mockbean-props-getter-replaced", "mockbean-props-setter", "mockbean-skip-pp-new", "mockbean-skip-pp-replaced", "pg-warn", "pg-nowarn"}
 # Số test mong đợi CHÍNH XÁC (đếm từ @Test/@RepeatedTest/@ParameterizedTest); đôi khi thêm/bớt test và phải sửa ở đây.
-EXPECTED_TESTS = {"it": 135, "auto": 1, "forks": 19, "demo": 33}
+EXPECTED_TESTS = {"it": 145, "auto": 1, "forks": 19, "demo": 33}
 # Skip được khai báo trước (lớp -> số skip) theo chế độ: ContextCleanupIT bỏ qua kiểm tra pg_database và DbPoolConfigIT bỏ qua SHOW max_connections, PostgresWarnIT (2 test) bỏ qua WARN của provisioner Postgres trên H2 (assumeTrue).
 DECLARED_SKIPS = {"h2": {"ContextCleanupIT": 1, "DbPoolConfigIT": 1, "PostgresWarnIT": 2}, "postgres": {}}
 MAX_CONTEXTS = int(os.environ.get("MAX_CONTEXTS", "40"))

@@ -779,4 +779,67 @@ class ClassLevelMockTest {
                 new String[0], java.util.Set.<org.springframework.test.context.ContextCustomizer>of(customizer),
                 org.mockito.Mockito.mock(org.springframework.test.context.ContextLoader.class), null, null);
     }
+
+    // ---- mock cấp class không đi qua BeanPostProcessor (như @MockBean) ----
+
+    static final java.util.List<String> POST_PROCESSED = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    /** Chỉ có getter: binder báo "No setter found" nếu bị bind vào mock có getter trả null. */
+    @org.springframework.boot.context.properties.ConfigurationProperties("mbx")
+    public static class GetterOnlyProps {
+        @org.springframework.beans.factory.annotation.Value("${mbx.code}")
+        private String code;
+
+        public String getCode() {
+            return code;
+        }
+    }
+
+    public static class NewProps extends GetterOnlyProps {
+    }
+
+    @Configuration
+    @org.springframework.boot.context.properties.EnableConfigurationProperties
+    static class PropsConfig {
+        @Bean @Primary @Qualifier("codes") GetterOnlyProps getterOnly() {
+            return new GetterOnlyProps();
+        }
+
+        @Bean static org.springframework.beans.factory.config.BeanPostProcessor recorder() {
+            return new org.springframework.beans.factory.config.BeanPostProcessor() {
+                @Override
+                public Object postProcessBeforeInitialization(Object bean, String beanName) {
+                    POST_PROCESSED.add(beanName);
+                    return bean;
+                }
+            };
+        }
+    }
+
+    @PerTestMock(GetterOnlyProps.class)
+    @PerTestMock(NewProps.class)
+    @ParallelSpringTest(context = "cl-props")
+    abstract static class PropsBase {
+    }
+
+    static class PropsTest extends PropsBase {
+        @PerTestMock GetterOnlyProps handle;
+    }
+
+    @Test
+    void classLevelMocksOfConfigurationPropertiesBeansSkipPostProcessing() {
+        POST_PROCESSED.clear();
+        AnnotationConfigApplicationContext c = Fixtures.context(declaration(PropsTest.class, "cl-props"), Map.of("mbx.code", "abc"), PropsConfig.class);
+        c.refresh();
+        ManagedContext mc = Fixtures.managed(c);
+
+        String created = java.util.Arrays.stream(c.getBeanNamesForType(NewProps.class, true, false)).filter(n -> !n.equals("getterOnly")).findFirst().orElseThrow();
+        assertThat(POST_PROCESSED).as("neither the replacement nor the new mock went through BeanPostProcessors").doesNotContain("getterOnly", created);
+        assertThat(c.getBean("getterOnly")).as("the singleton is the one wrapper the interceptor owns").isSameAs(mc.interceptors.get("getterOnly").wrapper);
+        assertThat(c.getBean(created)).isSameAs(mc.interceptors.get(created).wrapper);
+        assertThat(mc.interceptors).as("exactly one interceptor per mock bean").containsOnlyKeys("getterOnly", created);
+        assertThat(c.getBeanFactory().getBeanDefinition("getterOnly").isPrimary()).isTrue();
+        assertThat(c.getBean(GetterOnlyProps.class)).isSameAs(c.getBean("getterOnly"));
+        assertThat(BeanFactoryAnnotationUtils.qualifiedBeanOfType(c.getBeanFactory(), GetterOnlyProps.class, "codes")).isSameAs(c.getBean("getterOnly"));
+    }
 }

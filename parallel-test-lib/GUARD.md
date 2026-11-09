@@ -173,7 +173,7 @@ cấp class: chỉ lớp con cần mock đặt field `@PerTestMock`; các lớp 
 
 Hai cạm bẫy của bean thật được mock theo từng test: (1) bean phải được bọc (`wrap`, mặc định `*`): bean `@ConfigurationProperties` và bean kiểu
 hạ tầng (`DataSource`, `EntityManagerFactory`, transaction manager, `MessageSource`, `ConversionService`) mặc định KHÔNG được bọc, muốn mock
-theo từng test thì liệt kê tên trong `wrap`; (2) wrapper mang giá trị field của bean thật tại lúc bọc (như `Mockito.spy`) nên đọc thẳng field
+theo từng test thì liệt kê tên trong `wrap` (hoặc khai mock cấp class để thay bean cho cả context; mock đó không đi qua bộ bind `@ConfigurationProperties`); (2) wrapper mang giá trị field của bean thật tại lúc bọc (như `Mockito.spy`) nên đọc thẳng field
 của bean đã tiêm vẫn thấy dữ liệu, nhưng `toString()` của bean được bọc là `Interceptor[<tên bean>]` (không phải `toString()` của bean thật).
 
 ### Khóa context

@@ -25,6 +25,12 @@ Danh sách tạm các hành vi KHÔNG khắc phục được (hoặc không đá
 - Hệ quả: test trong cùng lớp chờ nhau (latch, barrier, điểm hẹn) sẽ kẹt vì method đợi nằm trước method được chờ; test không chờ nhau chỉ mất độ song song trong lớp đó.
 - Cách xử lý: không đặt `@TestMethodOrder` trên lớp cần song song theo method, hoặc thêm `@Execution(CONCURRENT)` vào lớp đó.
 
+## 4. Mock cấp class so với `@MockBean`
+
+- Giống: mock được tạo ngay lúc dựng context và đăng ký như singleton có sẵn kèm định nghĩa (`registerSingleton` sau `registerBeanDefinition`, như `@MockBean`), nên KHÔNG đi qua BeanPostProcessor nào: không bind `@ConfigurationProperties` (bean chỉ có getter không còn lỗi "No setter found"), không tiêm `@Autowired`, không chạy `@PostConstruct`, không bọc proxy AOP (`@Transactional`/`@Async`/`@Cacheable`). Định nghĩa giữ lại nên tra theo kiểu, `@Qualifier`, `@Primary`, `@Fallback` và alias vẫn đúng.
+- Còn khác `@MockBean`: (1) bean mock tạo mới không có lớp trong định nghĩa nên `@ConditionalOnBean(MockedType)` của auto-configuration không thấy nó; (2) bean thay thế chỉ giữ tên, alias, `@Primary`, `@Fallback`, `@Qualifier`: `@DependsOn`, init/destroy-method và scope của bản thật bị bỏ; (3) bean tiêm vào test là một wrapper dùng chung cả context: stub qua handle `@PerTestMock` của từng test, còn `when(<field @Autowired>.x())` bị phát hiện bằng `BEAN_WRAPPER_STUBBED` (`@MockBean` thì stub thẳng và được reset sau mỗi test).
+- Tests ghi nhận: `ClassLevelMockTest.classLevelMocksOfConfigurationPropertiesBeansSkipPostProcessing`, `ConfigPropsGetterOnly*IT`, `MockSkipsPostProcessing*IT`.
+
 ## Điều kiện cần theo dõi
 
 Không phải hạn chế ở các phiên bản JUnit đã kiểm (5.10.5, 5.11.4, 6.0.3); ghi lại hành vi hiện tại và điều thư viện sẽ báo nếu JUnit đổi.
